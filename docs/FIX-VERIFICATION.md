@@ -65,5 +65,17 @@ local build is not a claim that the live domain is fixed.
    sitemap. Test quote intake only with an agreed test submission and verify it reaches the durable
    queue/notification destination.
 
-No claim is made that the site works “perfectly”: Lighthouse performance, exhaustive cross-browser
-coverage, real notification delivery and post-deployment production verification remain outstanding.
+## Netlify deploy-preview status
+
+PR #1 triggered a Netlify deploy preview for commit `83bb4b0`, but Netlify reported **Deploy failed**.
+GitHub's check output contains no build-log detail, and the Netlify deploy log requires hosting
+authentication that is not available in this session.
+
+A local `netlify build --offline` run completed the Next.js production build and Node function
+bundling, then failed while bundling the edge function with `fetch failed` in the sandbox's restricted
+network. That local network failure is not proof of the remote failure cause. The remote deploy log is
+needed before changing the middleware/runtime configuration blindly.
+
+No claim is made that the site works “perfectly”: the Netlify preview must be repaired, Lighthouse
+performance and exhaustive cross-browser coverage remain outstanding, and real notification delivery
+plus post-deployment production verification still need to be checked.
