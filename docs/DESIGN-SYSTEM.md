@@ -18,11 +18,11 @@ an action, a live state, or a measured result.
 | `--tm-line-strong` | `rgba(255,255,255,.18)` | `rgba(8,20,32,.22)` | Focus-adjacent borders |
 | `--tm-mist` | `#E7EEF6` | `#0B1219` | Primary text |
 | `--tm-mute` | `#8A99AB` | `#56636F` | Secondary text |
-| `--tm-accent` | `#29E6FF` | `#067D92` | Actions, live state, data |
-| `--tm-accent-soft` | `rgba(41,230,255,.14)` | `rgba(6,125,146,.10)` | Selected/hover fills |
+| `--tm-accent` | `#29E6FF` | `#056B7D` | Actions, live state, data |
+| `--tm-accent-soft` | `rgba(41,230,255,.14)` | `rgba(5,107,125,.10)` | Selected/hover fills |
 | `--tm-warn` | `#FFB020` | `#9A5B00` | Placeholder markers, destructive hints |
 
-The light accent is deliberately darker: `#29E6FF` on white fails WCAG AA for text, `#067D92`
+The light accent is deliberately darker: `#29E6FF` on white fails WCAG AA for text, `#056B7D`
 passes. Theme is a variable swap on `[data-theme]`, not a second stylesheet.
 
 **Rule:** the accent never decorates. If a surface is accent-coloured, it is interactive, live,

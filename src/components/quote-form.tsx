@@ -208,7 +208,7 @@ export function QuoteForm({
 
   const progress = (step / STEPS.length) * 100;
   const field =
-    "w-full rounded-xl border border-[color:var(--tm-line)] bg-[color:var(--tm-panel)] px-4 py-3 text-[0.92rem] text-mist outline-none transition-colors placeholder:text-mute/60 focus:border-accent";
+    "w-full rounded-xl border border-[color:var(--tm-line)] bg-[color:var(--tm-panel)] px-4 py-3 text-[0.92rem] text-mist outline-none transition-colors placeholder:text-mute focus:border-accent";
 
   return (
     <div className="card-surface overflow-hidden">

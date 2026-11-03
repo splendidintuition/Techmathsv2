@@ -49,7 +49,7 @@ export function InsightsExplorer({
             onChange={(e) => setQ(e.target.value)}
             placeholder="Search articles, checklists, guides…"
             aria-label="Search insights"
-            className="w-full bg-transparent text-[0.88rem] text-mist outline-none placeholder:text-mute/60"
+            className="w-full bg-transparent text-[0.88rem] text-mist outline-none placeholder:text-mute"
           />
         </div>
       </div>

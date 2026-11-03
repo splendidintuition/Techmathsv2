@@ -157,7 +157,7 @@ export default async function AdminPage() {
               {PLACEHOLDER_REGISTER.map((p) => (
                 <li key={p.item} className="text-[0.82rem] leading-relaxed">
                   <span className="text-mist">{p.item}</span>
-                  <span className="mt-1 block font-mono text-[0.6rem] tracking-[0.04em] text-mute/70">{p.where}</span>
+                  <span className="mt-1 block font-mono text-[0.6rem] tracking-[0.04em] text-mute">{p.where}</span>
                 </li>
               ))}
             </ul>

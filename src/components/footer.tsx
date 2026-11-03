@@ -1,13 +1,13 @@
 import Link from "next/link";
 import { COMPANY } from "@/lib/content/site";
-import { listServices } from "@/lib/queries";
+import { SERVICES } from "@/lib/content/services";
 import { IconLinkedIn, IconMail, IconPhone, IconWhatsapp } from "./icons";
 import { Wordmark } from "./logo";
 import { MotionToggle } from "./theme-toggle";
 import { NewsletterForm } from "./newsletter-form";
 
 export function Footer() {
-  const services = listServices();
+  const services = SERVICES;
   const year = new Date().getFullYear();
 
   return (
@@ -36,7 +36,7 @@ export function Footer() {
                 <IconWhatsapp className="h-4 w-4" /> WhatsApp
               </a>
             </div>
-            <p className="mt-6 text-[0.78rem] leading-relaxed text-mute/70">
+            <p className="mt-6 text-[0.78rem] leading-relaxed text-mute">
               {COMPANY.headquarters.address}
               <br />
               {COMPANY.legalName} · {COMPANY.registration}
@@ -103,7 +103,7 @@ export function Footer() {
         </div>
 
         <div className="mt-14 flex flex-col gap-4 border-t border-[color:var(--tm-line)] pt-6 sm:flex-row sm:items-center sm:justify-between">
-          <p className="font-mono text-[0.66rem] uppercase tracking-[0.14em] text-mute/70">
+          <p className="font-mono text-[0.66rem] uppercase tracking-[0.14em] text-mute">
             © {year} {COMPANY.legalName} — Lisbon · Europe · UK · US · India
           </p>
           <nav aria-label="Legal" className="flex flex-wrap items-center gap-x-5 gap-y-2">

@@ -20,7 +20,7 @@ export const COMPANY = {
   leadsEmail: "leads@techmaths.com", // PLACEHOLDER
   phone: "+351 21 000 0000", // PLACEHOLDER
   whatsapp: "+351900000000", // PLACEHOLDER
-  domain: "techmaths.com", // PLACEHOLDER — confirm domain
+  domain: "techmaths-dc.com", // Canonical apex; www redirects here.
   headquarters: {
     city: "Lisbon",
     country: "Portugal",

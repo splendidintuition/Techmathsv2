@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { COMPANY } from "./content/site";
 
-export const SITE_URL = (process.env.NEXT_PUBLIC_SITE_URL || "https://techmaths.com").replace(/\/$/, "");
+export const SITE_URL = (process.env.NEXT_PUBLIC_SITE_URL || "https://techmaths-dc.com").replace(/\/$/, "");
 
 export function absoluteUrl(path: string): string {
   return `${SITE_URL}${path.startsWith("/") ? path : `/${path}`}`;

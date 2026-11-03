@@ -151,7 +151,7 @@ export function LeadsTable({ leads, serviceTitles }: { leads: Lead[]; serviceTit
               <span className="text-[0.82rem] text-mute">{l.email}</span>
               <span className="font-mono text-[0.62rem] uppercase tracking-[0.12em] text-mute">{l.country}</span>
               <StatusPill status={l.status} />
-              <span className="ml-auto font-mono text-[0.6rem] uppercase tracking-[0.12em] text-mute/70">
+              <span className="ml-auto font-mono text-[0.6rem] uppercase tracking-[0.12em] text-mute">
                 {l.createdAt}
               </span>
             </button>
@@ -225,7 +225,7 @@ export function StatusPill({ status }: { status: string }) {
     status === "won"
       ? "border-accent/45 bg-[color:var(--tm-accent-soft)] text-accent"
       : status === "spam" || status === "lost"
-        ? "border-[color:var(--tm-line)] text-mute/70"
+        ? "border-[color:var(--tm-line)] text-mute"
         : "border-[color:var(--tm-line-strong)] text-mute";
   return (
     <span className={`rounded-full border px-2.5 py-1 font-mono text-[0.58rem] uppercase tracking-[0.14em] ${tone}`}>

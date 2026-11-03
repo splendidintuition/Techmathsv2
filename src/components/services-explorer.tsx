@@ -43,7 +43,7 @@ export function ServicesExplorer({ services }: { services: Service[] }) {
             onChange={(e) => setQ(e.target.value)}
             placeholder="Filter services…"
             aria-label="Filter services by keyword"
-            className="w-full bg-transparent text-[0.88rem] text-mist outline-none placeholder:text-mute/60"
+            className="w-full bg-transparent text-[0.88rem] text-mist outline-none placeholder:text-mute"
           />
         </div>
       </div>
@@ -64,7 +64,7 @@ export function ServicesExplorer({ services }: { services: Service[] }) {
                 <span className="flex h-11 w-11 items-center justify-center rounded-xl border border-[color:var(--tm-line)] text-mute transition-colors group-hover:border-accent group-hover:text-accent">
                   <ServiceIcon name={s.icon} className="h-5 w-5" />
                 </span>
-                <span className="font-mono text-[0.58rem] uppercase tracking-[0.14em] text-mute/70">
+                <span className="font-mono text-[0.58rem] uppercase tracking-[0.14em] text-mute">
                   {categoryOf(s.slug).label}
                 </span>
               </div>

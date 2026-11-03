@@ -123,7 +123,7 @@ export function ProcessStory({ stages }: { stages: Stage[] }) {
             className={`rounded-2xl border p-6 transition-all duration-500 sm:p-7 ${
               i === active
                 ? "border-accent/45 bg-[color:var(--tm-panel)]"
-                : "border-[color:var(--tm-line)] bg-transparent opacity-60"
+                : "border-[color:var(--tm-line)] bg-transparent"
             }`}
           >
             <div className="flex items-baseline gap-4">

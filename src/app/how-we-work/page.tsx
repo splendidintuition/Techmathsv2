@@ -97,7 +97,7 @@ export default function HowWeWorkPage() {
                 <IconDoc className="h-4 w-4 text-accent" />
                 handover-pack.pdf
               </span>
-              <span className="font-mono text-[0.6rem] uppercase tracking-[0.14em] text-mute/60">6 sections</span>
+              <span className="font-mono text-[0.6rem] uppercase tracking-[0.14em] text-mute">6 sections</span>
             </div>
             <ul className="divide-y divide-[color:var(--tm-line)]">
               {HANDOVER_PACK.map((h) => (

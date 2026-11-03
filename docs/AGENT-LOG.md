@@ -23,7 +23,7 @@ references. All recorded in `docs/HANDOVER.md` §4.
 
 **Output:** `docs/DESIGN-SYSTEM.md` + `src/app/globals.css` token layer.
 
-Near-black `#0A0D12` base, one accent (`#29E6FF` dark / `#067D92` light for AA contrast),
+Near-black `#0A0D12` base, one accent (`#29E6FF` dark / `#056B7D` light for AA contrast),
 three self-hosted variable faces, fluid `clamp()` type, `gap-px` card grids that read as
 engineering drawings, and one easing curve site-wide.
 

@@ -25,20 +25,26 @@ export async function GET() {
     checks.database = { ok: false, error: err instanceof Error ? err.message : String(err) };
   }
 
-  checks.content = {
-    services: listServices().length,
-    projects: listProjects().length,
-    insights: listInsights().length,
-  };
-
-  const stats = leadStats();
-  checks.leads = { total: stats.total, last30Days: stats.last30, subscribers: subscriberCount() };
-  checks.recentLeads = listLeads(5).map((l) => ({
-    reference: l.reference,
-    createdAt: l.createdAt,
-    status: l.status,
-  }));
-  checks.traffic = trafficStats(30);
+  const dbOk = (checks.database as { ok?: boolean }).ok === true;
+  if (dbOk) {
+    try {
+      checks.content = {
+        services: listServices().length,
+        projects: listProjects().length,
+        insights: listInsights().length,
+      };
+      const stats = leadStats();
+      checks.leads = { total: stats.total, last30Days: stats.last30, subscribers: subscriberCount() };
+      checks.recentLeads = listLeads(5).map((l) => ({
+        reference: l.reference,
+        createdAt: l.createdAt,
+        status: l.status,
+      }));
+      checks.traffic = trafficStats(30);
+    } catch (err) {
+      checks.database = { ok: false, error: err instanceof Error ? err.message : String(err) };
+    }
+  }
   checks.env = {
     siteUrl: process.env.NEXT_PUBLIC_SITE_URL ?? "(unset)",
     leadNotifyEmail: process.env.LEAD_NOTIFY_EMAIL ?? "(unset)",
@@ -46,9 +52,9 @@ export async function GET() {
     analyticsConfigured: Boolean(process.env.NEXT_PUBLIC_ANALYTICS_DOMAIN),
   };
 
-  const dbOk = (checks.database as { ok?: boolean }).ok === true;
+  const ok = (checks.database as { ok?: boolean }).ok === true;
   return NextResponse.json(
-    { ok: dbOk, uptimeMs: Date.now() - started, checkedAt: new Date().toISOString(), checks },
-    { status: dbOk ? 200 : 503 }
+    { ok, uptimeMs: Date.now() - started, checkedAt: new Date().toISOString(), checks },
+    { status: ok ? 200 : 503, headers: { "Cache-Control": "no-store" } },
   );
 }

@@ -52,7 +52,7 @@ export default async function RegionalServicePage({ params }: { params: Promise<
   const p = resolve(await params);
   if (!p) notFound();
 
-  const quoteHref = `/contact?service=${p.service.slug}&country=${p.coverage.code}`;
+  const quoteHref = `/contact?service=${p.service.slug}&country=${encodeURIComponent(p.coverage.name)}`;
   const projects = listProjects({ service: p.service.slug }).slice(0, 3);
   const countries = regionalCoverage();
 

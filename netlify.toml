@@ -1,0 +1,17 @@
+# Netlify must use the Next.js runtime, not a static-only export: this app has
+# server-rendered routes and API handlers.
+[build]
+  command = "npm run build"
+  publish = ".next"
+
+[build.environment]
+  NODE_VERSION = "22"
+  NEXT_PUBLIC_SITE_URL = "https://techmaths-dc.com"
+  NEXT_TELEMETRY_DISABLED = "1"
+
+[[plugins]]
+  package = "@netlify/plugin-nextjs"
+
+# IMPORTANT: serverless function filesystems are not a persistent lead database.
+# Configure durable storage before enabling production quote intake. The API
+# deliberately returns 503 (not a false success) if it cannot persist a request.
