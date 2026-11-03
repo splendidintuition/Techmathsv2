@@ -71,10 +71,11 @@ PR #1 triggered a Netlify deploy preview for commit `83bb4b0`, but Netlify repor
 GitHub's check output contains no build-log detail, and the Netlify deploy log requires hosting
 authentication that is not available in this session.
 
-A local `netlify build --offline` run completed the Next.js production build and Node function
-bundling, then failed while bundling the edge function with `fetch failed` in the sandbox's restricted
-network. That local network failure is not proof of the remote failure cause. The remote deploy log is
-needed before changing the middleware/runtime configuration blindly.
+A local `netlify build --offline` run initially completed the Next.js production build and Node
+function bundling, then failed while bundling the admin middleware as an Edge Function. The admin
+sign-in check was moved into the server-rendered admin page, preserving the redirect behaviour while
+removing the Edge Function requirement. A subsequent local `netlify build --offline` completed
+successfully. The hosted preview result for that adjustment is recorded in PR #1.
 
 No claim is made that the site works “perfectly”: the Netlify preview must be repaired, Lighthouse
 performance and exhaustive cross-browser coverage remain outstanding, and real notification delivery

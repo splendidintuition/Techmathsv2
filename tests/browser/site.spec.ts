@@ -62,6 +62,12 @@ test("mobile navigation and keyboard search open and close", async ({ page, isMo
   }
 });
 
+test("admin console redirects unauthenticated visitors to sign-in", async ({ page }) => {
+  await page.goto("/admin");
+  await expect(page).toHaveURL(/\/admin\/login\?next=(?:%2F|\/)admin$/i);
+  await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
+});
+
 test("coverage map, country details and quote deep link work", async ({ page }) => {
   await page.goto("/coverage");
   await expect(page.getByRole("heading", { level: 1 })).toContainText("wherever you build");
