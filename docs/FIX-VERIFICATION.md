@@ -31,7 +31,7 @@ after scrolling or leaving the window.
 | TypeScript | Pass |
 | Unit/API tests | 71 passed |
 | Production build | Pass, 199 routes generated |
-| Browser regression suite | 37 passed, 1 platform-appropriate skip |
+| Browser regression suite | 39 passed, 1 platform-appropriate skip |
 | Real-browser accessibility/contrast | Home, contact, coverage and country page pass in dark/light at 360 px and 1440 px |
 | Full crawl (`scripts/audit.mjs`) | 188 pages, 0 page issues; 187 internal links, 0 dead links |
 | Read-only database simulation | `/`, `/contact`, `/coverage`, `/coverage/portugal` return 200 |
@@ -75,7 +75,10 @@ A local `netlify build --offline` run initially completed the Next.js production
 function bundling, then failed while bundling the admin middleware as an Edge Function. The admin
 sign-in check was moved into the server-rendered admin page, preserving the redirect behaviour while
 removing the Edge Function requirement. A subsequent local `netlify build --offline` completed
-successfully. The hosted preview result for that adjustment is recorded in PR #1.
+successfully. The hosted Netlify previews still reported **Deploy failed**, including after that
+adjustment. GitHub exposes no log detail and the Netlify API/dashboard returns Access Denied without
+hosting authentication, so the remote failure cause is not yet established. The failed deploy log is
+required before further deployment-specific changes are made.
 
 No claim is made that the site works “perfectly”: the Netlify preview must be repaired, Lighthouse
 performance and exhaustive cross-browser coverage remain outstanding, and real notification delivery
