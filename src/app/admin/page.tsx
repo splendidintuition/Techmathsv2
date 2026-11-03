@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
 import { LeadsTable } from "@/components/leads-table";
 import { Logo } from "@/components/logo";
 import { PlaceholderTag } from "@/components/ui";
@@ -23,6 +25,13 @@ export const metadata: Metadata = {
 export const dynamic = "force-dynamic";
 
 export default async function AdminPage() {
+  // Keep the admin gate in the Node-rendered page. This preserves the previous
+  // middleware behaviour without requiring a Netlify Edge Function bundle.
+  const token = (await cookies()).get("tm_admin")?.value;
+  if (!process.env.ADMIN_TOKEN || token !== process.env.ADMIN_TOKEN) {
+    redirect("/admin/login?next=/admin");
+  }
+
   const [leads, stats, traffic, services, projects, insights] = [
     listLeads(200),
     leadStats(),
@@ -157,7 +166,7 @@ export default async function AdminPage() {
               {PLACEHOLDER_REGISTER.map((p) => (
                 <li key={p.item} className="text-[0.82rem] leading-relaxed">
                   <span className="text-mist">{p.item}</span>
-                  <span className="mt-1 block font-mono text-[0.6rem] tracking-[0.04em] text-mute/70">{p.where}</span>
+                  <span className="mt-1 block font-mono text-[0.6rem] tracking-[0.04em] text-mute">{p.where}</span>
                 </li>
               ))}
             </ul>

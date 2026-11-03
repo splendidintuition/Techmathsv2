@@ -50,26 +50,40 @@ export async function POST(req: NextRequest) {
     });
   }
 
-  const lead = createLead({
-    name: data.name,
-    email: data.email,
-    company: data.company,
-    phone: data.phone,
-    country: data.country,
-    siteLocation: data.siteLocation,
-    services: data.services,
-    racks: data.racks,
-    servers: data.servers,
-    ports: data.ports,
-    timeline: data.timeline,
-    urgency: data.urgency,
-    message: data.message,
-    source: data.source,
-    consentPrivacy: data.consentPrivacy,
-    consentMarketing: Boolean(data.consentMarketing),
-    spamScore: score,
-    ipHash: hashIp(req),
-  });
+  let lead: ReturnType<typeof createLead>;
+  try {
+    lead = createLead({
+      name: data.name,
+      email: data.email,
+      company: data.company,
+      phone: data.phone,
+      country: data.country,
+      siteLocation: data.siteLocation,
+      services: data.services,
+      racks: data.racks,
+      servers: data.servers,
+      ports: data.ports,
+      timeline: data.timeline,
+      urgency: data.urgency,
+      message: data.message,
+      source: data.source,
+      consentPrivacy: data.consentPrivacy,
+      consentMarketing: Boolean(data.consentMarketing),
+      spamScore: score,
+      ipHash: hashIp(req),
+    });
+  } catch (err) {
+    // A serverless deployment may not have a writable/persistent database.
+    // Never turn a storage failure into a successful quote acknowledgement.
+    console.error("[leads] could not persist quote request", err);
+    return NextResponse.json(
+      {
+        ok: false,
+        message: "The quote desk is temporarily unavailable. Your request has not been sent. Please try again shortly or use the email address shown beside the form.",
+      },
+      { status: 503, headers: { "Cache-Control": "no-store" } },
+    );
+  }
 
   // Optional CRM/webhook hand-off. Failures are logged, never surfaced to the user.
   const webhook = process.env.LEAD_WEBHOOK_URL;

@@ -161,7 +161,7 @@ export default async function ServicePage({ params }: { params: Promise<{ slug: 
             </div>
             <div className="card-surface p-7">
               <h3 className="text-[1.05rem] text-mute">What is not included</h3>
-              <p className="mt-2 text-[0.82rem] text-mute/80">
+              <p className="mt-2 text-[0.82rem] text-mute">
                 Stated up front so the scope boundary is never a surprise. Most of these are available as add-ons.
               </p>
               <div className="mt-5">

@@ -1,4 +1,4 @@
-import { afterAll, describe, expect, it } from "vitest";
+import { afterAll, describe, expect, it, vi } from "vitest";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
@@ -14,7 +14,8 @@ const { GET: searchRoute } = await import("@/app/api/search/route");
 const { GET: health } = await import("@/app/api/health/route");
 const { GET: download } = await import("@/app/api/download/[slug]/route");
 const { PATCH: patchLead } = await import("@/app/api/admin/leads/[id]/route");
-const { listLeads } = await import("@/lib/queries");
+const queries = await import("@/lib/queries");
+const { listLeads } = queries;
 
 const json = (body: unknown) => new NextRequest("http://localhost/api", {
   method: "POST",
@@ -45,6 +46,25 @@ describe("POST /api/leads", () => {
     expect(data.ok).toBe(true);
     expect(data.reference).toMatch(/^TM-\d{4}-[A-Z0-9]{5}$/);
     expect(data.message).toContain("Ana");
+  });
+
+  it("returns an explicit 503 when storage is unavailable, without claiming success", async () => {
+    const log = vi.spyOn(console, "error").mockImplementation(() => undefined);
+    const storage = vi.spyOn(queries, "createLead").mockImplementationOnce(() => {
+      throw new Error("SQLITE_READONLY: attempt to write a readonly database");
+    });
+    try {
+      const res = await createLeadRoute(json(validLead));
+      expect(res.status).toBe(503);
+      expect(res.headers.get("cache-control")).toBe("no-store");
+      const data = await res.json();
+      expect(data.ok).toBe(false);
+      expect(data.reference).toBeUndefined();
+      expect(data.message).toContain("has not been sent");
+    } finally {
+      storage.mockRestore();
+      log.mockRestore();
+    }
   });
 
   it("persists the lead with its parsed fields", () => {

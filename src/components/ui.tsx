@@ -193,7 +193,7 @@ export function StatBlock({
         {suffix && <span className="text-accent">{suffix}</span>}
       </p>
       <p className="mt-2 text-[0.85rem] text-mute">{label}</p>
-      {note && <p className="mt-1 font-mono text-[0.6rem] uppercase tracking-[0.14em] text-mute/60">{note}</p>}
+      {note && <p className="mt-1 font-mono text-[0.6rem] uppercase tracking-[0.14em] text-mute">{note}</p>}
       <span className="absolute -bottom-4 left-0 h-px w-0 bg-accent transition-all duration-500 group-hover:w-full" />
     </div>
   );

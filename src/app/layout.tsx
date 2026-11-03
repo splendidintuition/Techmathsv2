@@ -8,7 +8,7 @@ import { Header } from "@/components/header";
 import { SearchDialog } from "@/components/search-dialog";
 import { COMPANY } from "@/lib/content/site";
 import { fontVariables } from "@/lib/fonts";
-import { listServices } from "@/lib/queries";
+import { SERVICES } from "@/lib/content/services";
 import { SITE_METADATA, SITE_URL } from "@/lib/seo";
 import "./globals.css";
 
@@ -31,7 +31,9 @@ export const viewport: Viewport = {
 const themeInit = `(function(){try{var t=localStorage.getItem('tm-theme');if(t==='light')document.documentElement.setAttribute('data-theme','light');else document.documentElement.setAttribute('data-theme','dark');if(localStorage.getItem('tm-motion')==='off')document.documentElement.setAttribute('data-motion','off');}catch(e){document.documentElement.setAttribute('data-theme','dark');}})();`;
 
 export default function RootLayout({ children }: { children: ReactNode }) {
-  const services = listServices().map((s) => ({ slug: s.slug, title: s.title, short: s.short }));
+  // Navigation is published catalogue content. Do not make every dynamic page
+  // depend on opening/seeding SQLite just to render the shared shell.
+  const services = SERVICES.map((s) => ({ slug: s.slug, title: s.title, short: s.short }));
 
   return (
     <html lang="en" data-theme="dark" suppressHydrationWarning>

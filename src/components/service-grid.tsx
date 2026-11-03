@@ -22,7 +22,7 @@ export function ServiceGrid({ services }: { services: Service[] }) {
                 <span className="flex h-11 w-11 items-center justify-center rounded-xl border border-[color:var(--tm-line)] text-mute transition-all duration-500 group-hover:border-accent group-hover:text-accent">
                   <ServiceIcon name={s.icon} className="h-5 w-5" />
                 </span>
-                <span className="font-mono text-[0.62rem] tracking-[0.16em] text-mute/60">
+                <span className="font-mono text-[0.62rem] tracking-[0.16em] text-mute">
                   {String(s.position).padStart(2, "0")}
                 </span>
               </div>

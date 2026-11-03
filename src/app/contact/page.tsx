@@ -3,8 +3,8 @@ import { QuoteForm } from "@/components/quote-form";
 import { IconClock, IconMail, IconPhone, IconPin, IconShield, IconWhatsapp } from "@/components/icons";
 import { Reveal } from "@/components/motion";
 import { Pill, SectionHead } from "@/components/ui";
-import { COMPANY } from "@/lib/content/site";
-import { listCoverage, listServices } from "@/lib/queries";
+import { COMPANY, COVERAGE } from "@/lib/content/site";
+import { SERVICES } from "@/lib/content/services";
 import { breadcrumbLd, buildMetadata, faqLd, jsonLd } from "@/lib/seo";
 
 export const metadata: Metadata = buildMetadata({
@@ -41,11 +41,19 @@ const CONTACT_FAQS = [
 export default async function ContactPage({
   searchParams,
 }: {
-  searchParams: Promise<{ service?: string; country?: string }>;
+  searchParams: Promise<{ service?: string | string[]; country?: string | string[] }>;
 }) {
-  const { service, country } = await searchParams;
-  const services = listServices();
-  const countries = listCoverage().map((c) => c.name);
+  const params = await searchParams;
+  // Repeated query parameters arrive as arrays. Never pass one into form state.
+  const service = typeof params.service === "string" ? params.service : undefined;
+  const country = typeof params.country === "string" ? params.country : undefined;
+  // The quote form only needs the published catalogue, not a writable database.
+  // Keep rendering it even when the lead-storage service is unavailable; the
+  // submit endpoint reports storage failures separately and never claims success.
+  const services = SERVICES;
+  const countries = [...COVERAGE]
+    .sort((a, b) => a.mobiliseHours - b.mobiliseHours || a.name.localeCompare(b.name))
+    .map((c) => c.name);
 
   return (
     <>
@@ -176,7 +184,7 @@ export default async function ContactPage({
               <p className="mt-4 text-[0.9rem] leading-relaxed text-mute">
                 {COMPANY.headquarters.address}
               </p>
-              <p className="mt-3 font-mono text-[0.62rem] uppercase tracking-[0.12em] text-mute/70">
+              <p className="mt-3 font-mono text-[0.62rem] uppercase tracking-[0.12em] text-mute">
                 Timezone {COMPANY.headquarters.timezone} · CET/CET−1 for European hubs
               </p>
               <ul className="mt-5 grid gap-2">

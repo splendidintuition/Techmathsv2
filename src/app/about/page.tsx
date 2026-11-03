@@ -86,7 +86,7 @@ export default function AboutPage() {
                 <span className="text-accent">{s.suffix}</span>
               </p>
               <p className="mt-3 text-[0.85rem] text-mute">{s.label}</p>
-              <p className="mt-1 font-mono text-[0.58rem] uppercase tracking-[0.14em] text-mute/60">
+              <p className="mt-1 font-mono text-[0.58rem] uppercase tracking-[0.14em] text-mute">
                 illustrative figure
               </p>
             </Reveal>
@@ -182,7 +182,7 @@ export default function AboutPage() {
                     <span className="font-mono text-[0.6rem] uppercase tracking-[0.14em] text-accent">{o.country}</span>
                   </div>
                   <p className="mt-2 text-[0.84rem] text-mute">{o.role}</p>
-                  <p className="mt-3 font-mono text-[0.6rem] uppercase tracking-[0.12em] text-mute/60">{o.address}</p>
+                  <p className="mt-3 font-mono text-[0.6rem] uppercase tracking-[0.12em] text-mute">{o.address}</p>
                 </li>
               ))}
             </ul>
@@ -239,7 +239,7 @@ export default function AboutPage() {
           {PLACEHOLDER_REGISTER.map((p) => (
             <li key={p.item} className="bg-ink p-5">
               <p className="text-[0.9rem] text-mist">{p.item}</p>
-              <p className="mt-2 font-mono text-[0.6rem] tracking-[0.06em] text-mute/70">{p.where}</p>
+              <p className="mt-2 font-mono text-[0.6rem] tracking-[0.06em] text-mute">{p.where}</p>
             </li>
           ))}
         </ul>

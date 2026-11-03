@@ -88,7 +88,7 @@ export function SearchDialog() {
             }}
             placeholder="Search services, projects, insights…"
             aria-label="Search query"
-            className="w-full bg-transparent py-4 text-[0.95rem] text-mist outline-none placeholder:text-mute/70"
+            className="w-full bg-transparent py-4 text-[0.95rem] text-mist outline-none placeholder:text-mute"
           />
           <button
             type="button"

@@ -146,7 +146,7 @@ export function CoverageMap({ countries }: { countries: CoverageCountry[] }) {
           </text>
         </svg>
 
-        <div className="pointer-events-none absolute bottom-3 left-4 font-mono text-[0.58rem] uppercase tracking-[0.16em] text-mute/70">
+        <div className="pointer-events-none absolute bottom-3 left-4 font-mono text-[0.58rem] uppercase tracking-[0.16em] text-mute">
           Select a country · {visible.length} shown
         </div>
       </div>
@@ -157,7 +157,11 @@ export function CoverageMap({ countries }: { countries: CoverageCountry[] }) {
             <button
               key={r}
               type="button"
-              onClick={() => setRegion(r)}
+              onClick={() => {
+                setRegion(r);
+                const first = r === "All" ? countries[0] : countries.find((country) => country.region === r);
+                if (first) setSelected(first.code);
+              }}
               aria-pressed={region === r}
               className={`rounded-full border px-3 py-1 font-mono text-[0.6rem] uppercase tracking-[0.12em] transition-colors ${
                 region === r

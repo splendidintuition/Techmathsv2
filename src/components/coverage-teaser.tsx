@@ -51,7 +51,7 @@ export function CoverageTeaser() {
           ))}
           <circle cx={HQ_POINT.x} cy={HQ_POINT.y} r="8" fill="none" stroke="var(--tm-accent)" strokeOpacity="0.45" />
         </svg>
-        <p className="mt-2 text-center font-mono text-[0.58rem] uppercase tracking-[0.16em] text-mute/70">
+        <p className="mt-2 text-center font-mono text-[0.58rem] uppercase tracking-[0.16em] text-mute">
           {european} European countries · hubs in 7 cities
         </p>
       </div>

@@ -10,7 +10,7 @@ silently. The same list is rendered inside `/admin` and on `/about`.
 | --- | --- | --- |
 | 1 | Legal entity name, NIF and registered address | `src/lib/content/site.ts` → `COMPANY` |
 | 2 | Real contact details: email, phone, WhatsApp, office addresses | `src/lib/content/site.ts` → `COMPANY` |
-| 3 | Canonical domain (`techmaths.com` assumed) | `.env.local` → `NEXT_PUBLIC_SITE_URL` |
+| 3 | Canonical domain (confirmed live apex: `techmaths-dc.com`; `www` redirects to it) | `.env.local` / hosting environment → `NEXT_PUBLIC_SITE_URL=https://techmaths-dc.com` |
 | 4 | Lead routing address and CRM webhook | `.env.local` → `LEAD_NOTIFY_EMAIL`, `LEAD_WEBHOOK_URL` |
 | 5 | Admin passcode and cookie secret | `.env.local` → `ADMIN_TOKEN`, `ADMIN_COOKIE_SECRET` |
 | 6 | Privacy, cookie and terms review by qualified counsel in PT/UK/US/IN | `src/app/privacy-policy`, `cookie-policy`, `terms-of-service` |
@@ -41,7 +41,9 @@ false per record and the on-page marker disappears.
 - [ ] Run Lighthouse in a real browser and record Performance / Accessibility / Best Practices /
       SEO against the 95+ target. The audit script covers SEO, headers, links and axe; it cannot
       measure paint performance because jsdom has no layout engine.
-- [ ] Verify colour contrast for both themes at 360 px and 1440 px.
+- [x] Verify colour contrast for both themes at 360 px and 1440 px on the home, contact,
+      coverage and country-page templates (`npm run test:browser`). Extend the browser suite to
+      the remaining templates before launch.
 - [ ] Configure analytics (`NEXT_PUBLIC_ANALYTICS_DOMAIN`) or rely on the first-party counter.
 - [ ] Point DNS, add TLS, and set `NEXT_PUBLIC_SITE_URL` to the real origin before indexing.
 - [ ] Submit `/sitemap.xml` to Search Console. It now lists 187 URLs, including 135 regional
@@ -58,16 +60,21 @@ false per record and the on-page marker disappears.
 | Spec question | Decision |
 | --- | --- |
 | Static vs dynamic | **Dynamic full stack** (changed at the client's instruction): Next.js App Router + SQLite + API routes + admin console. The spec's "100% static" requirement is superseded; pages are still statically generated where they can be. |
-| Company name / domain | Tech Maths; `techmaths.com` assumed pending confirmation. |
+| Company name / domain | Tech Maths; canonical origin `https://techmaths-dc.com` (the live `www` host redirects to the apex). Contact email/phone remain placeholders until supplied. |
 | Coverage | **Global**: Lisbon HQ, Europe as the core market, plus UK, US, India, UAE and Singapore — 28 countries. The spec's "Coverage — Europe" page became a world map with regional filters. |
 | Languages at launch | English only, with i18n-ready routing. |
-| Accent colour | Electric cyan `#29E6FF` on near-black `#0A0D12`, per spec §7. Light mode uses `#067D92` to hold WCAG AA contrast. |
+| Accent colour | Electric cyan `#29E6FF` on near-black `#0A0D12`, per spec §7. Light mode uses `#056B7D` to hold WCAG AA contrast. |
 | Case studies | Illustrative but clearly marked, rather than blank pages or unlabelled fiction. |
 | Hosting | Any Node host with a writable disk. Not static-only hosting (see README). |
 
 ## 5. Known limitations
 
-- Colour contrast is unverified by automation (see above).
+- **Netlify lead storage is a launch blocker.** `netlify.toml` enables the Next.js runtime so pages and API routes are deployed correctly, but a serverless function's filesystem is not durable shared storage. Do not store production leads in `/tmp` or a deployment-local SQLite file. Use a Node host with a persistent writable volume for the existing SQLite implementation, or migrate operational storage to a managed database before accepting quotes on Netlify. Public catalogue pages and the contact form no longer require a writable database to render; submission fails explicitly with HTTP 503 if a lead cannot be saved.
+- The source checkout was missing `/coverage`, `/coverage/[country]` and `scripts/seed.ts`. These are restored. The ignore rule for generated coverage reports is now root-only (`/coverage/`) so it cannot hide application routes again.
+- Real-browser axe checks, including colour contrast, pass for the home, contact, coverage and
+  country-page templates in both themes at 360 px and 1440 px. The remaining templates are covered
+  by the jsdom audit with contrast disabled; Lighthouse performance and exhaustive cross-browser
+  testing are still outstanding.
 - `better-sqlite3` is pinned at 12.11.1; 13.0.3 segfaults on Node 20 in sandboxed environments.
 - The 404 page, legal pages and admin console are excluded from the sitemap and `robots.txt`.
 - Analytics counts only visitors who accept in the consent banner, so totals understate traffic

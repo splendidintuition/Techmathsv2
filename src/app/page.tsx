@@ -144,7 +144,7 @@ export default function HomePage() {
             {[...CLIENT_LOGOS, ...CLIENT_LOGOS].map((name, i) => (
               <span
                 key={`${name}-${i}`}
-                className="flex shrink-0 items-center gap-2.5 font-mono text-[0.66rem] uppercase tracking-[0.18em] text-mute/60"
+                className="flex shrink-0 items-center gap-2.5 font-mono text-[0.66rem] uppercase tracking-[0.18em] text-mute"
               >
                 <span className="h-3 w-3 rounded-[3px] border border-[color:var(--tm-line-strong)]" />
                 {name}

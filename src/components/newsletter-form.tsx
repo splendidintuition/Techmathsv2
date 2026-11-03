@@ -53,7 +53,7 @@ export function NewsletterForm() {
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           placeholder="you@company.com"
-          className="min-w-0 flex-1 bg-transparent py-1.5 text-[0.85rem] text-mist outline-none placeholder:text-mute/60"
+          className="min-w-0 flex-1 bg-transparent py-1.5 text-[0.85rem] text-mist outline-none placeholder:text-mute"
         />
         <button
           type="submit"
@@ -63,7 +63,7 @@ export function NewsletterForm() {
           {state === "loading" ? "…" : "Join"}
         </button>
       </div>
-      <p className="mt-2 font-mono text-[0.58rem] uppercase tracking-[0.12em] text-mute/60">
+      <p className="mt-2 font-mono text-[0.58rem] uppercase tracking-[0.12em] text-mute">
         One email a month. Unsubscribe anytime.
       </p>
       {state === "error" && <p className="mt-2 text-[0.78rem] text-[color:var(--tm-warn)]">{msg}</p>}

@@ -38,7 +38,7 @@ export function LegalPage({
           <Pill>{eyebrow}</Pill>
           <h1 className="mt-6 max-w-3xl text-[clamp(2rem,4.6vw,3.2rem)]">{title}</h1>
           <p className="mt-5 max-w-2xl text-[1rem] leading-relaxed text-mute">{intro}</p>
-          <p className="mt-6 font-mono text-[0.62rem] uppercase tracking-[0.14em] text-mute/70">
+          <p className="mt-6 font-mono text-[0.62rem] uppercase tracking-[0.14em] text-mute">
             Last updated {updated}
           </p>
         </div>
@@ -87,7 +87,7 @@ export function LegalPage({
                 </a>{" "}
                 · {COMPANY.phone}
               </p>
-              <p className="mt-4 text-[0.82rem] text-mute/80">
+              <p className="mt-4 text-[0.82rem] text-mute">
                 Company and contact details on this page are placeholders pending confirmation. This document is a
                 drafting template and should be reviewed by qualified counsel in each jurisdiction where you
                 operate before launch.
