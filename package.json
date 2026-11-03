@@ -1,0 +1,39 @@
+{
+  "name": "techmaths",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Tech Maths — hands-on data center engineering. Full-stack Next.js site with lead pipeline, content layer and admin console.",
+  "scripts": {
+    "dev": "next dev -H 0.0.0.0 -p 3000",
+    "build": "next build",
+    "start": "next start -H 0.0.0.0 -p 3000",
+    "typecheck": "tsc --noEmit",
+    "db:seed": "tsx scripts/seed.ts",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "audit": "node scripts/audit.mjs"
+  },
+  "dependencies": {
+    "better-sqlite3": "12.11.1",
+    "next": "15.5.28",
+    "react": "19.1.10",
+    "react-dom": "19.1.10",
+    "zod": "^4.1.12"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "4.3.4",
+    "@types/better-sqlite3": "^7.6.13",
+    "@types/node": "^20.19.0",
+    "@types/react": "^19.1.10",
+    "@types/react-dom": "^19.1.10",
+    "axe-core": "^4.14.0",
+    "d3-geo": "^3.1.2",
+    "jsdom": "^29.1.1",
+    "tailwindcss": "4.3.4",
+    "topojson-client": "^3.1.0",
+    "tsx": "^4.20.0",
+    "typescript": "^5.9.0",
+    "vitest": "^3.2.0",
+    "world-atlas": "^2.0.2"
+  }
+}

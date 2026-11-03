@@ -1,0 +1,18 @@
+{
+  "name": "Tech Maths — Data center engineering",
+  "short_name": "Tech Maths",
+  "description": "Hands-on data center engineering: build, cable, install, commission and support across Europe, the UK, the US and India.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0A0D12",
+  "theme_color": "#0A0D12",
+  "lang": "en",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}
