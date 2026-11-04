@@ -168,7 +168,7 @@ export function QuoteForm({
       });
     } catch {
       setStatus("failed");
-      setResult({ reference: "", message: "Network error. Please try again, or email leads@techmaths.com." });
+      setResult({ reference: "", message: "Network error. Please try again, or email sales@techmaths-dc.com." });
     }
   };
 

@@ -176,7 +176,7 @@ export default async function AdminPage() {
             <h2 className="text-[1.05rem]">Environment</h2>
             <ul className="mt-4 space-y-2 text-[0.8rem]">
               {[
-                ["Site URL", process.env.NEXT_PUBLIC_SITE_URL ?? "(unset — defaults to techmaths.com)"],
+                ["Site URL", process.env.NEXT_PUBLIC_SITE_URL ?? "(unset — defaults to techmaths-dc.com)"],
                 ["Lead notify email", process.env.LEAD_NOTIFY_EMAIL ?? "(unset)"],
                 ["CRM webhook", process.env.LEAD_WEBHOOK_URL ? "configured" : "(unset)"],
                 ["Analytics", process.env.NEXT_PUBLIC_ANALYTICS_DOMAIN ?? "(unset — first-party only)"],

@@ -53,7 +53,7 @@ export default function AboutPage() {
                 <IconPin className="h-3 w-3" />
                 {COMPANY.headquarters.city}, {COMPANY.headquarters.country}
               </Pill>
-              <Pill>Founded {COMPANY.founded}</Pill>
+              {COMPANY.founded && <Pill>Founded {COMPANY.founded}</Pill>}
               <Pill tone="warn">Team profiles are placeholders</Pill>
             </div>
           </Reveal>
@@ -170,8 +170,8 @@ export default function AboutPage() {
         <div className="grid gap-14 lg:grid-cols-[0.9fr_1.1fr] lg:gap-20">
           <SectionHead
             eyebrow="Where we are"
-            title="One company, several time zones"
-            lead="Lisbon is the headquarters and the Iberia hub. Regional hubs keep travel time short, and regional teams in the US and India keep the standard identical."
+            title="Lisbon headquarters. International delivery."
+            lead="Our registered company is based in Prior Velho, Lisboa. Tech Maths coordinates data-centre services across Europe, the UK, the United States and India; site availability and mobilisation are confirmed for each project."
           />
           <div>
             <ul className="grid gap-px overflow-hidden rounded-2xl border border-[color:var(--tm-line)] bg-[color:var(--tm-line)] sm:grid-cols-2">

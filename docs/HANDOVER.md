@@ -1,17 +1,17 @@
 # Handover — what the company must supply before launch
 
-The site is complete and deployable today. Everything listed here is currently **illustrative**
-and is marked as such on the page where it appears, so nothing fabricated can reach a client
-silently. The same list is rendered inside `/admin` and on `/about`.
+The site is built and deployable. Some launch items remain **illustrative** and are marked as such
+on the page where they appear. The company identity, address and contact details supplied by the
+owner have now been entered. The remaining checklist is rendered inside `/admin` and on `/about`.
 
 ## 1. Blocking (legal / trust risk)
 
 | # | Item | Where to change |
 | --- | --- | --- |
-| 1 | Legal entity name, NIF and registered address | `src/lib/content/site.ts` → `COMPANY` |
-| 2 | Real contact details: email, phone, WhatsApp, office addresses | `src/lib/content/site.ts` → `COMPANY` |
-| 3 | Canonical domain (confirmed live apex: `techmaths-dc.com`; `www` redirects to it) | `.env.local` / hosting environment → `NEXT_PUBLIC_SITE_URL=https://techmaths-dc.com` |
-| 4 | Lead routing address and CRM webhook | `.env.local` → `LEAD_NOTIFY_EMAIL`, `LEAD_WEBHOOK_URL` |
+| 1 | Company NIF / registration number (not supplied) | `src/lib/content/site.ts` → `COMPANY.registration` |
+| 2 | Contact details supplied and updated: info, sales, helpdesk, phone and Lisbon-area address | `src/lib/content/site.ts` → `COMPANY` |
+| 3 | Public website domain confirmed as `techmaths-dc.com`; point DNS and TLS to production hosting before launch | `.env.local` → `NEXT_PUBLIC_SITE_URL` |
+| 4 | Sales notification routes to `sales@techmaths-dc.com`; optional CRM webhook remains unconfigured | `.env.local` → `LEAD_NOTIFY_EMAIL`, `LEAD_WEBHOOK_URL` |
 | 5 | Admin passcode and cookie secret | `.env.local` → `ADMIN_TOKEN`, `ADMIN_COOKIE_SECRET` |
 | 6 | Privacy, cookie and terms review by qualified counsel in PT/UK/US/IN | `src/app/privacy-policy`, `cookie-policy`, `terms-of-service` |
 
@@ -60,7 +60,7 @@ false per record and the on-page marker disappears.
 | Spec question | Decision |
 | --- | --- |
 | Static vs dynamic | **Dynamic full stack** (changed at the client's instruction): Next.js App Router + SQLite + API routes + admin console. The spec's "100% static" requirement is superseded; pages are still statically generated where they can be. |
-| Company name / domain | Tech Maths; canonical origin `https://techmaths-dc.com` (the live `www` host redirects to the apex). Contact email/phone remain placeholders until supplied. |
+| Company name / domain | Brand: Tech Maths. Legal entity: Splendidintuition Lda. Public website and email domain: `techmaths-dc.com`. |
 | Coverage | **Global**: Lisbon HQ, Europe as the core market, plus UK, US, India, UAE and Singapore — 28 countries. The spec's "Coverage — Europe" page became a world map with regional filters. |
 | Languages at launch | English only, with i18n-ready routing. |
 | Accent colour | Electric cyan `#29E6FF` on near-black `#0A0D12`, per spec §7. Light mode uses `#056B7D` to hold WCAG AA contrast. |
@@ -69,12 +69,7 @@ false per record and the on-page marker disappears.
 
 ## 5. Known limitations
 
-- **Netlify lead storage is a launch blocker.** `netlify.toml` enables the Next.js runtime so pages and API routes are deployed correctly, but a serverless function's filesystem is not durable shared storage. Do not store production leads in `/tmp` or a deployment-local SQLite file. Use a Node host with a persistent writable volume for the existing SQLite implementation, or migrate operational storage to a managed database before accepting quotes on Netlify. Public catalogue pages and the contact form no longer require a writable database to render; submission fails explicitly with HTTP 503 if a lead cannot be saved.
-- The source checkout was missing `/coverage`, `/coverage/[country]` and `scripts/seed.ts`. These are restored. The ignore rule for generated coverage reports is now root-only (`/coverage/`) so it cannot hide application routes again.
-- Real-browser axe checks, including colour contrast, pass for the home, contact, coverage and
-  country-page templates in both themes at 360 px and 1440 px. The remaining templates are covered
-  by the jsdom audit with contrast disabled; Lighthouse performance and exhaustive cross-browser
-  testing are still outstanding.
+- Colour contrast is unverified by automation (see above).
 - `better-sqlite3` is pinned at 12.11.1; 13.0.3 segfaults on Node 20 in sandboxed environments.
 - The 404 page, legal pages and admin console are excluded from the sitemap and `robots.txt`.
 - Analytics counts only visitors who accept in the consent banner, so totals understate traffic

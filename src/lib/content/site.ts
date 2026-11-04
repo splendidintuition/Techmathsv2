@@ -9,31 +9,27 @@ import type { CoverageCountry, Industry, TeamMember, Testimonial } from "../type
  * fact once you read the handover list.
  */
 export const COMPANY = {
-  name: "Tech Maths",
-  legalName: "Tech Maths, Lda.", // PLACEHOLDER — confirm legal entity and registration
-  registration: "NIF 000 000 000", // PLACEHOLDER
+  name: "Tech Maths", // Brand name
+  legalName: "Splendidintuition Lda",
+  registration: "", // NIF/registration number not supplied yet
   tagline: "Hands-on data center engineering, anywhere you build.",
   positioning:
     "We are a specialist data center delivery partner. Our engineers build racks, pull and certify cable, install and configure servers and networks, commission the result and stay on call afterwards — in Lisbon, across Europe, and in the UK, US and India.",
-  founded: 2019, // PLACEHOLDER — confirm founding year
-  email: "hello@techmaths.com", // PLACEHOLDER
-  leadsEmail: "leads@techmaths.com", // PLACEHOLDER
-  phone: "+351 21 000 0000", // PLACEHOLDER
-  whatsapp: "+351900000000", // PLACEHOLDER
-  domain: "techmaths-dc.com", // Canonical apex; www redirects here.
+  founded: null, // Not supplied; do not publish an assumed founding year
+  email: "info@techmaths-dc.com",
+  leadsEmail: "sales@techmaths-dc.com",
+  helpdeskEmail: "helpdesk@techmaths-dc.com",
+  phone: "+351 928 262 816",
+  whatsapp: "+351 928 262 816",
+  domain: "techmaths-dc.com",
   headquarters: {
-    city: "Lisbon",
+    city: "Prior Velho, Lisboa",
     country: "Portugal",
-    address: "Av. da Liberdade 000, 1250-096 Lisboa, Portugal", // PLACEHOLDER
+    address: "Rua Prof. Dom Henrique de Barros 28, Estadio 6, 2685-338 Prior Velho, Lisboa, Portugal",
     timezone: "Europe/Lisbon",
   },
   offices: [
-    { city: "Lisbon", country: "PT", role: "Headquarters & Iberia hub", address: "Av. da Liberdade 000, Lisboa", placeholder: true },
-    { city: "Frankfurt", country: "DE", role: "DACH & Central Europe hub", address: "Frankfurt am Main", placeholder: true },
-    { city: "London", country: "GB", role: "UK & Ireland hub", address: "London", placeholder: true },
-    { city: "Amsterdam", country: "NL", role: "Benelux & Nordics hub", address: "Amsterdam", placeholder: true },
-    { city: "Ashburn, VA", country: "US", role: "US East coverage", address: "Northern Virginia", placeholder: true },
-    { city: "Mumbai", country: "IN", role: "India coverage", address: "Mumbai", placeholder: true },
+    { city: "Prior Velho, Lisboa", country: "PT", role: "Company headquarters", address: "Rua Prof. Dom Henrique de Barros 28, Estadio 6, 2685-338 Prior Velho, Lisboa, Portugal", placeholder: false },
   ],
   languages: ["English", "Português", "Español", "Deutsch", "Français"],
   responsePromise: "Quoted within 4 business hours. Emergency remote hands mobilised from the nearest hub.",
@@ -414,14 +410,13 @@ export const HOME_FAQS = [
  * Rendered in the admin console as a pre-launch checklist.
  */
 export const PLACEHOLDER_REGISTER = [
-  { item: "Company legal name, NIF and registered address", where: "src/lib/content/site.ts → COMPANY" },
-  { item: "Contact details: email, phone, WhatsApp, office addresses", where: "src/lib/content/site.ts → COMPANY" },
+  { item: "Company NIF / registration number", where: "src/lib/content/site.ts → COMPANY.registration" },
   { item: "Headline figures in the trust strip (28 / 380 / 60 / 4h)", where: "src/lib/content/site.ts → STATS" },
   { item: "Case studies — all 8 are illustrative and flagged on-page", where: "src/lib/content/projects.ts" },
   { item: "Testimonials — all 5 are illustrative and flagged on-page", where: "src/lib/content/site.ts → TESTIMONIALS" },
   { item: "Client logos — neutral placeholders, no invented brands", where: "src/lib/content/site.ts → CLIENT_LOGOS" },
   { item: "Team bios, photographs and certifications", where: "src/lib/content/site.ts → TEAM" },
   { item: "Certifications and insurance documents (PDFs)", where: "public/downloads/" },
-  { item: "Lead routing address and CRM webhook", where: ".env.local → LEAD_NOTIFY_EMAIL, LEAD_WEBHOOK_URL" },
+  { item: "Optional CRM webhook", where: ".env.local → LEAD_WEBHOOK_URL" },
   { item: "Canonical domain for SEO metadata", where: ".env.local → NEXT_PUBLIC_SITE_URL" },
 ];
