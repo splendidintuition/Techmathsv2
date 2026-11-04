@@ -7,7 +7,6 @@ import { IconArrowUpRight, IconClose, IconMenu, IconSearch } from "./icons";
 import { Wordmark } from "./logo";
 import { ThemeToggle } from "./theme-toggle";
 import { Btn } from "./ui";
-import { portalHref } from "@/lib/portal-url";
 
 type NavService = { slug: string; title: string; short: string };
 
@@ -83,10 +82,10 @@ export function Header({ services }: { services: NavService[] }) {
             : "border-b border-transparent"
         }`}
       >
-        <div className="shell flex h-[72px] items-center justify-between gap-6">
+        <div className="shell flex h-[72px] items-center justify-between gap-4">
           <Wordmark />
 
-          <nav className="hidden items-center gap-1 lg:flex" aria-label="Main">
+          <nav className="hidden shrink-0 items-center gap-0 xl:flex" aria-label="Main">
             {NAV.map((item) =>
               item.key === "services" ? (
                 <div
@@ -99,7 +98,7 @@ export function Header({ services }: { services: NavService[] }) {
                     href={item.href}
                     onFocus={() => setMegaOpen(true)}
                     aria-expanded={megaOpen}
-                    className={`rounded-full px-3.5 py-2 text-[0.86rem] transition-colors ${
+                    className={`whitespace-nowrap rounded-full px-2.5 py-2 text-[0.86rem] transition-colors ${
                       isActive(item.href) ? "text-accent" : "text-mute hover:text-mist"
                     }`}
                   >
@@ -132,7 +131,7 @@ export function Header({ services }: { services: NavService[] }) {
                 <Link
                   key={item.href}
                   href={item.href}
-                  className={`rounded-full px-3.5 py-2 text-[0.86rem] transition-colors ${
+                  className={`whitespace-nowrap rounded-full px-2.5 py-2 text-[0.86rem] transition-colors ${
                     isActive(item.href) ? "text-accent" : "text-mute hover:text-mist"
                   }`}
                 >
@@ -153,10 +152,6 @@ export function Header({ services }: { services: NavService[] }) {
               <span className="font-mono text-[0.62rem] tracking-[0.12em]">⌘K</span>
             </button>
             <ThemeToggle className="hidden sm:inline-flex" />
-            <div className="hidden items-center gap-1 xl:flex">
-              <Link href={portalHref("client")} className="rounded-full px-3 py-2 text-[0.75rem] text-mute transition-colors hover:text-accent">Client login</Link>
-              <Link href={portalHref("engineer")} className="rounded-full px-3 py-2 text-[0.75rem] text-mute transition-colors hover:text-accent">Engineer login</Link>
-            </div>
             <div className="hidden sm:block">
               <Btn href="/contact" size="sm" arrow>
                 Request a quote
@@ -165,7 +160,7 @@ export function Header({ services }: { services: NavService[] }) {
             <button
               type="button"
               onClick={() => setMenuOpen((v) => !v)}
-              className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-[color:var(--tm-line)] text-mist lg:hidden"
+              className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-[color:var(--tm-line)] text-mist xl:hidden"
               aria-label={menuOpen ? "Close menu" : "Open menu"}
               aria-expanded={menuOpen}
             >
@@ -177,7 +172,7 @@ export function Header({ services }: { services: NavService[] }) {
 
       {/* Mobile drawer */}
       <div
-        className={`fixed inset-0 z-[65] lg:hidden ${menuOpen ? "visible" : "invisible"}`}
+        className={`fixed inset-0 z-[65] xl:hidden ${menuOpen ? "visible" : "invisible"}`}
         aria-hidden={!menuOpen}
       >
         <div
@@ -217,10 +212,6 @@ export function Header({ services }: { services: NavService[] }) {
                 {s.title}
               </Link>
             ))}
-          </div>
-          <div className="mt-8 grid grid-cols-2 gap-2">
-            <Link href={portalHref("client")} onClick={() => setMenuOpen(false)} className="rounded-full border border-[color:var(--tm-line)] px-3 py-2.5 text-center text-[0.78rem] text-mist">Client login</Link>
-            <Link href={portalHref("engineer")} onClick={() => setMenuOpen(false)} className="rounded-full border border-[color:var(--tm-line)] px-3 py-2.5 text-center text-[0.78rem] text-mist">Engineer login</Link>
           </div>
           <div className="mt-4 flex flex-wrap items-center gap-3">
             <Btn href="/contact" arrow onClick={() => setMenuOpen(false)}>

@@ -20,15 +20,10 @@ export function Logo({ className = "h-8 w-8" }: { className?: string }) {
 
 export function Wordmark({ href = "/" }: { href?: string }) {
   return (
-    <Link href={href} className="group flex items-center gap-3" aria-label="Tech Maths — home">
-      <Logo className="h-8 w-8 text-mist transition-transform duration-500 group-hover:rotate-[-6deg]" />
-      <span className="flex flex-col leading-none">
-        <span className="font-display text-[1.02rem] font-medium tracking-[-0.02em] text-mist">
-          Tech<span className="text-accent">Maths</span>
-        </span>
-        <span className="mt-1 font-mono text-[0.55rem] uppercase tracking-[0.28em] text-mute">
-          Data center engineering
-        </span>
+    <Link href={href} className="group flex shrink-0 items-center gap-2.5" aria-label="Tech Maths — home">
+      <Logo className="h-10 w-10 text-mist transition-transform duration-500 group-hover:rotate-[-6deg]" />
+      <span className="font-display text-[1.15rem] font-medium tracking-[-0.02em] text-mist">
+        Tech<span className="text-accent">Maths</span>
       </span>
     </Link>
   );
