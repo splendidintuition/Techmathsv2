@@ -12,8 +12,15 @@ const schema = z.object({
 export async function PATCH(req: Request, { params }: { params: Promise<{ id: string }> }) {
   const { id: rawId } = await params;
   const cookie = req.headers.get("cookie") ?? "";
-  const token = /(?:^|;\s*)tm_admin=([^;]+)/.exec(cookie)?.[1];
-  if (!token || token !== process.env.ADMIN_TOKEN) {
+  const rawToken = /(?:^|;\s*)tm_admin=([^;]+)/.exec(cookie)?.[1];
+  let token: string | undefined;
+  try {
+    // Next.js URL-encodes cookie values, so decode before comparing.
+    token = rawToken ? decodeURIComponent(rawToken) : undefined;
+  } catch {
+    token = undefined;
+  }
+  if (!token || !process.env.ADMIN_TOKEN || token !== process.env.ADMIN_TOKEN) {
     return NextResponse.json({ ok: false, error: "Unauthorised" }, { status: 401 });
   }
 
