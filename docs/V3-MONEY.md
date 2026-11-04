@@ -4,7 +4,8 @@ Rate cards → quotes → client decision → invoice → payment. No freelancer
 processing, no automated VAT return. Every client-facing step is gated by a database feature flag
 that an Admin controls.
 
-- Migration: `supabase/migrations/20261104130000_portal_v3_money.sql`
+- Migrations: `supabase/migrations/20261104130000_portal_v3_money.sql` and
+  `20261104140000_portal_v3_expenses.sql` (R3.1 expenses)
 - Data layer: `src/lib/portal-money.ts`
 - UI: `src/components/portal/v3/` (`money-room.tsx`, `money-quotes.tsx`, `money-invoices.tsx`,
   `money-rate-cards.tsx`, `money-settings.tsx`, `line-editor.tsx`)
@@ -33,6 +34,7 @@ name.
 | `quotes` / `quote_lines` | `Q-YYYY-NNNN`; status, discount, VAT rate, validity, acceptance and decline record |
 | `invoices` / `invoice_lines` | `INV-YYYY-NNNN`; status, issue and due dates, amount paid, balance, void reason |
 | `payments` | amount, method, reference, received date, notes — one row per receipt |
+| `expenses` | cost booked against a client, site or ticket: net, VAT rate, generated VAT and gross, category, vendor, receipt link, reimbursable flag, review trail |
 
 `organizations.vat_rate` is added (default 23) so a quote can pre-fill the VAT rate.
 
@@ -48,6 +50,21 @@ VAT at the document's rate. `line_total` is a generated column. `balance = total
   due date, never set by hand. `void` is only allowed while `amount_paid = 0` (otherwise
   `invoice_has_payments`).
 
+## Expenses (R3.1)
+
+Costs are internal: no client ever sees them, and nothing here pays anybody.
+
+- `draft → submitted → approved | rejected`. Edits are allowed while `draft` or `rejected`; saving a
+  rejected claim puts it back to draft so it re-enters review.
+- Logging and approving are **separate permissions** (`finance.expenses` vs
+  `finance.expenses_approve`), and self-approval is refused unless the actor is the admin — the
+  single super user.
+- A claim marked *reimbursable* (somebody paid personally) must carry a receipt link before it can
+  be saved. Approval marks it as owed; it does not move money.
+- VAT and gross are generated columns, so the ledger cannot disagree with itself.
+- Metrics: awaiting value, approved this month, approved overall, reimbursable owed, and VAT on
+  approved expenses year to date — a bookkeeping aid, not a VAT return.
+
 ## Permissions
 
 | Key | Grants |
@@ -56,6 +73,8 @@ VAT at the document's rate. `line_total` is a generated column. `balance = total
 | `finance.payments` | recording and reversing payments |
 | `clients.contracts` | rate cards |
 | `finance.margins` | visibility of `engineer_cost` on rate cards |
+| `finance.expenses` | expenses tab: log, edit and submit claims |
+| `finance.expenses_approve` | approve or reject a submitted claim (admin by default) |
 | `settings.users` | the Settings tab, i.e. the flag switches and demo controls |
 
 The Money sidebar item appears for internal roles only; the console then renders only the tabs the
@@ -94,6 +113,12 @@ Run as the admin account against `vwdqrbtrykrdwpbxbypj`:
 7. Balances, metrics and the audit trail (`quote.created`, `quote.sent`, `quote.accepted`,
    `invoice.from_quote`, `invoice.issued`, `payment.recorded`) all agreed with the UI maths.
 8. All flags returned to **off** and `portal_purge_demo()` removed the demo rows.
+
+## Verified against the live database
+
+Expenses were exercised the same way: create → submit → reject → edit → resubmit → approve, with
+the self-approval guard and the receipt requirement firing as designed, then removed with the demo
+purge.
 
 ## Deliberately out of scope
 

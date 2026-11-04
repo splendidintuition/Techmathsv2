@@ -1,6 +1,12 @@
 import { describe, expect, it } from "vitest";
 import {
+  EXPENSE_CATEGORIES,
+  EXPENSE_STATUSES,
   PAYMENT_METHODS,
+  expenseGross,
+  expenseSummaryOf,
+  expenseTone,
+  expenseVat,
   agingBucket,
   blankLine,
   cleanLines,
@@ -12,6 +18,7 @@ import {
   moneyError,
   quoteSummaryOf,
   quoteTone,
+  type ExpenseRow,
   type InvoiceSummary,
   type QuoteSummary,
 } from "@/lib/portal-money";
@@ -216,5 +223,87 @@ describe("money errors", () => {
   it("falls back to the generic description for unknown messages", () => {
     const error = moneyError({ message: "something unexpected", code: "XX000" });
     expect(error.message.length).toBeGreaterThan(0);
+  });
+});
+
+describe("expenses", () => {
+  const expense = (over: Partial<ExpenseRow>): ExpenseRow => ({
+    id: Math.random().toString(36).slice(2),
+    spent_on: "2026-11-02",
+    category: "travel",
+    vendor: "CP",
+    description: "Lisbon to Porto",
+    currency: "EUR",
+    amount_net: 100,
+    vat_rate: 23,
+    vat_amount: 23,
+    amount_gross: 123,
+    reimbursable: false,
+    receipt_url: "",
+    notes: "",
+    status: "submitted",
+    organization_id: null,
+    client_name: null,
+    site_id: null,
+    site_name: null,
+    ticket_id: null,
+    ticket_number: null,
+    ticket_title: null,
+    submitted_at: null,
+    reviewed_at: null,
+    reviewed_by_name: null,
+    review_note: "",
+    created_by: null,
+    created_by_name: null,
+    is_demo: false,
+    created_at: "2026-11-02T10:00:00Z",
+    ...over,
+  });
+
+  it("derives VAT and gross the way the generated columns do", () => {
+    expect(expenseVat(100, 23)).toBe(23);
+    expect(expenseGross(100, 23)).toBe(123);
+    expect(expenseVat(84.5, 6)).toBe(5.07);
+    expect(expenseGross(84.5, 6)).toBe(89.57);
+    expect(expenseVat(33.33, 23)).toBe(7.67);
+    expect(expenseGross(33.33, 23)).toBe(41);
+  });
+
+  it("clamps nonsense VAT rates", () => {
+    expect(expenseVat(100, -5)).toBe(0);
+    expect(expenseVat(100, 250)).toBe(100);
+    expect(expenseVat(Number.NaN, 23)).toBe(0);
+  });
+
+  it("tones expense statuses", () => {
+    expect(expenseTone("approved")).toBe("good");
+    expect(expenseTone("submitted")).toBe("accent");
+    expect(expenseTone("rejected")).toBe("danger");
+    expect(expenseTone("draft")).toBe("muted");
+  });
+
+  it("summarises awaiting, approved, reimbursable and this month", () => {
+    const summary = expenseSummaryOf(
+      [
+        expense({ status: "submitted", amount_gross: 123 }),
+        expense({ status: "submitted", amount_gross: 50 }),
+        expense({ status: "approved", amount_gross: 200, reimbursable: true }),
+        expense({ status: "approved", amount_gross: 100, spent_on: "2026-10-31" }),
+        expense({ status: "draft", amount_gross: 999 }),
+        expense({ status: "rejected", amount_gross: 999 }),
+      ],
+      today,
+    );
+    expect(summary.awaiting).toBe(173);
+    expect(summary.awaitingCount).toBe(2);
+    expect(summary.approved).toBe(300);
+    expect(summary.reimbursable).toBe(200);
+    expect(summary.month).toBe(200);
+  });
+
+  it("ships eight categories, travel first", () => {
+    expect(EXPENSE_CATEGORIES).toHaveLength(8);
+    expect(EXPENSE_CATEGORIES[0]).toBe("travel");
+    expect(EXPENSE_STATUSES).toEqual(["draft", "submitted", "approved", "rejected"]);
   });
 });

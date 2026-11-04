@@ -271,3 +271,43 @@ three flags returned to off.
 `money_respond_quote` already authorises a client organization member to accept or decline, but the
 only UI for it today sits in the internal console, so staff record the decision on the client's
 behalf and the acceptance names who gave it.
+
+## Agent 13 — Database engineer (R3.1 expenses)
+
+**Brief:** costs booked against a job, reviewed before they count, still no payouts.
+
+One additive migration (`20261104140000_portal_v3_expenses.sql`): the `expenses` table with two
+enums, generated VAT and gross columns, four indexes, two permission keys and six
+`money_*_expense*` functions. Submitting and approving are split across the two permissions so the
+person who spent the money cannot sign it off alone; `expense_self_approval` blocks it explicitly
+for everyone except the admin. A reimbursable claim without a receipt link is refused at the
+database (`expense_receipt_required`), not just in the form.
+
+**Design decisions:** expenses are internal — the select policy requires `finance.expenses` and the
+internal role, so a client organization member can never read the cost side of their own work.
+Editing a rejected claim resets it to draft rather than silently keeping the rejection, and every
+transition writes an audit row. `portal_purge_demo()` now clears expenses before payments so a
+single purge still removes the whole demo dataset.
+
+## Agent 14 — Frontend engineer (expenses tab)
+
+**Brief:** fast enough to log a receipt from a phone, clear enough that an admin can audit it.
+
+A fifth money tab, visible to holders of `finance.expenses`. Stats strip (awaiting, approved this
+month, approved overall, owed to people), a status filter, and a table that shows net, VAT and gross
+separately because those are three different questions. Receipt links open in a new tab; the review
+modal records the note that lands on the expense and in the audit log. Approve and reject are
+hidden entirely without `finance.expenses_approve`, and the year-to-date VAT line is labelled as a
+bookkeeping aid rather than a return.
+
+## Agent 15 — QA / release engineer (R3.1)
+
+| Check | Command | Result |
+| --- | --- | --- |
+| Types | `npx tsc --noEmit` | clean |
+| Tests | `npx vitest run` | 124/124 (5 new expense assertions) |
+| Build | `npm run build` | compiled successfully, `/portal` 121 kB / 260 kB |
+| Live database | SQL as the admin account | create → submit → reject → resubmit → approve, then purge |
+
+**Not covered:** receipt file uploads (claims carry a URL for now) and any payout flow — approving a
+reimbursable claim records a debt, it does not pay it.
