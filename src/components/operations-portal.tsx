@@ -20,6 +20,7 @@ import {
   LogOut,
   MapPin,
   MessageSquare,
+  ReceiptText,
   Plus,
   Radio,
   Search,
@@ -34,9 +35,10 @@ import { TicketChat } from "@/components/portal/ticket-chat";
 import { LiveMapView } from "@/components/portal/live-map-view";
 import { TimesheetsView } from "@/components/portal/timesheets-view";
 import { ControlRoom } from "@/components/portal/v2/control-room";
+import { MoneyRoom } from "@/components/portal/v3/money-room";
 
 type Role = "admin" | "staff" | "freelancer" | "client";
-type Page = "Overview" | "Tickets" | "Live map" | "Timesheets" | "Control" | "Services" | "Coverage";
+type Page = "Overview" | "Tickets" | "Live map" | "Timesheets" | "Control" | "Money" | "Services" | "Coverage";
 type Profile = { id: string; role: Role; full_name: string; is_active: boolean };
 type Ticket = {
   id: string;
@@ -591,6 +593,11 @@ export function OperationsPortal() {
     ...(profile.role === "admin" || profile.role === "staff"
       ? ([["Control", Activity]] as Array<[Page, any]>)
       : []),
+    // Release 3: money spine. Also internal-only; the console itself is gated by
+    // the finance permissions the database returns.
+    ...(profile.role === "admin" || profile.role === "staff"
+      ? ([["Money", ReceiptText]] as Array<[Page, any]>)
+      : []),
     ["Services", Wrench],
     ["Coverage", Globe2],
   ];
@@ -759,6 +766,9 @@ export function OperationsPortal() {
 
             {/* CONTROL CONSOLE (release 2) */}
             {page === "Control" && <ControlRoom />}
+
+            {/* MONEY CONSOLE (release 3) */}
+            {page === "Money" && <MoneyRoom />}
 
             {/* TIMESHEETS PAGE */}
             {page === "Timesheets" && (

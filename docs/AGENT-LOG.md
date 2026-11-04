@@ -215,3 +215,59 @@ database, and the first query still fails loudly with the original message.
 **Not covered:** automated browser runs (Playwright) against the new console, and the
 375 px screenshots. Both need a seeded session against the live project and are the first item
 on the Release 3 checklist.
+
+## Agent 10 — Database engineer (Release 3 money spine)
+
+**Brief:** rate cards → quotes → client approval → invoice → payment, flag-gated, no payouts.
+
+One additive migration (`20261104130000_portal_v3_money.sql`, 1444 lines) adding eight tables
+(`feature_flags`, `rate_cards`, `rate_card_lines`, `quotes`, `quote_lines`, `invoices`,
+`invoice_lines`, `payments`), four enums, two number sequences and 24 `money_*` functions. Writes go
+through `security definer` RPCs only — the tables are select-only for the API and every RPC checks
+`auth.uid()`, the permission key, then raises a named SQLSTATE and writes an audit row.
+
+**Design decisions:** totals are recalculated in the database on every line change so a client can
+never be invoiced for maths the browser invented; `line_total` is a generated column. The invoice
+status is never set by hand — `part_paid`, `paid` and `overdue` are derived from payments and the
+due date. Voiding is blocked once money has been recorded, because the correct answer there is a
+credit note, not a retraction.
+
+**Money guard:** `money_require_flag(key)` raises `0A000 feature_disabled:<key>` when the
+corresponding `feature_flags` row is off. Sending quotes, issuing invoices and recording payments
+each sit behind their own switch, so the whole spine can be demonstrated internally while nothing
+reaches a client until the owner is ready.
+
+## Agent 11 — Frontend engineer (money console)
+
+**Brief:** a console dense enough for a bookkeeper, quiet enough for the owner.
+
+New "Money" sidebar item (internal roles), five tabs: overview with receivables aging, quotes,
+invoices, rate cards and settings. Every mutation is a database call — the UI never computes a
+status, it re-reads the document after each action. Flag state is shown three ways: a banner that
+names exactly which actions are switched off, a per-tab note, and disabled buttons whose tooltip
+names the flag. Draft documents are editable; issued invoices are not, because a client already has
+a copy.
+
+**Design decisions:** the money guard is explained in operator language ("switching this off keeps
+every quote a private draft") rather than as a toggle label. Aging buckets follow the invoice due
+date, and the 90+ band is the only one that borrows the danger colour. Rate-card costs disappear
+entirely without `finance.margins` instead of rendering zeros.
+
+## Agent 12 — QA / release engineer (Release 3)
+
+| Check | Command | Result |
+| --- | --- | --- |
+| Types | `npx tsc --noEmit` | clean |
+| Tests | `npx vitest run` | 119/119 (19 new money assertions) |
+| Build | `npm run build` | compiled successfully, `/portal` 117 kB / 256 kB |
+| Live database | SQL as the admin account | full spine exercised, then purged |
+
+The live run proved all three flag refusals (`0A000 feature_disabled:<key>`), the complete
+draft → send → accept → convert → issue → part-paid → paid path, the overpayment and void guards,
+and that metrics and audit rows matched the documents. Demo data was removed afterwards and all
+three flags returned to off.
+
+**Not covered:** Playwright runs against the money console, and a client-facing acceptance screen.
+`money_respond_quote` already authorises a client organization member to accept or decline, but the
+only UI for it today sits in the internal console, so staff record the decision on the client's
+behalf and the acceptance names who gave it.
