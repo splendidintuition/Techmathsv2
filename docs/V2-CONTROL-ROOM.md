@@ -103,3 +103,13 @@ three RPCs, so those screens work again.
 `NEXT_PUBLIC_SUPABASE_ANON_KEY` was missing from the build environment while
 `SUPABASE_ANON_KEY` existed, so `isSupabaseConfigured` was false and the portal fell back to
 its "not connected" state. It is now present for production, preview and development.
+
+## Deployment
+
+| Target | URL | Status |
+| --- | --- | --- |
+| Pull request | https://github.com/splendidintuition/Techmathsv2/pull/12 | open, from `arena/3426b8c0-techmathsv2` |
+| Preview build | https://techmathsv2-git-arena-3426b8c0-techmathsv2-tech-maths.vercel.app/portal | READY, Vercel SSO protected (sign in with the TechMaths Vercel account) |
+| Production | https://techmaths-dc.com/portal | unchanged until PR #12 is merged; the project is git-linked to `main` |
+
+Merging the pull request is the only step left, and it deploys the console to the live domain.

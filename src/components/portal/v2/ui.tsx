@@ -72,7 +72,9 @@ export function Stat({
       <div className="font-mono text-[10px] uppercase tracking-[0.16em] text-[#7E8CA0]">{label}</div>
       <div className="mt-1.5 flex items-baseline gap-2">
         <span className="text-[24px] font-semibold leading-none text-[#F2F7FF]">{value}</span>
-        <Pill tone={tone}>live</Pill>
+        <span className={`h-1.5 w-1.5 rounded-full ${
+          tone === "danger" ? "bg-[#FF6B6B]" : tone === "warn" ? "bg-[#FFB020]" : tone === "good" ? "bg-[#3DDC97]" : "bg-[#29E6FF]"
+        }`} />
       </div>
       {hint && <div className="mt-1.5 text-[11px] text-[#8A99AB]">{hint}</div>}
     </div>

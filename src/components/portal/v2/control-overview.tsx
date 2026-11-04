@@ -5,7 +5,6 @@ import { Search, RefreshCw, Database, Trash2, ArrowUpRight } from "lucide-react"
 import {
   controlApi,
   metricCells,
-  slaLabel,
   statusTone,
   describeError,
   type CapacityDay,
@@ -280,8 +279,7 @@ export function ControlOverview({
               ))}
             </ul>
             <p className="mt-3 font-mono text-[10px] uppercase tracking-[0.12em] text-[#5F6F84]">
-              snapshot {new Date(metrics.generated_at).toLocaleString("en-GB", { timeZone: "Europe/Lisbon" })} · Lisbon · next SLA{" "}
-              {slaLabel(metrics.tickets.sla_at_risk > 0 ? new Date(Date.now() + 3_600_000).toISOString() : null)}
+              snapshot {new Date(metrics.generated_at).toLocaleString("en-GB", { timeZone: "Europe/Lisbon" })} · Lisbon
             </p>
           </Panel>
         </>
