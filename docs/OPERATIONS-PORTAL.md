@@ -9,6 +9,8 @@ The public marketing site and authorized operations portal now share this Next.j
 - Ticket create/status RPC integration, services catalogue reused from `src/lib/content/services.ts`, coverage reference, and link to the existing public quote form.
 - Quote form success state links existing clients/engineers to the portal. Public leads remain in the existing lead pipeline and are not automatically converted into operational tickets.
 - No demo users, sites, organizations, tickets, locations, or timesheets are added.
+- Release consoles for internal roles: **Control** (see `V2-CONTROL-ROOM.md`) and **Money** (see
+  `V3-MONEY.md`, flag-gated quotes → invoices → payments).
 
 ## Environment
 
