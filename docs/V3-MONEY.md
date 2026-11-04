@@ -4,8 +4,9 @@ Rate cards → quotes → client decision → invoice → payment. No freelancer
 processing, no automated VAT return. Every client-facing step is gated by a database feature flag
 that an Admin controls.
 
-- Migrations: `supabase/migrations/20261104130000_portal_v3_money.sql` and
-  `20261104140000_portal_v3_expenses.sql` (R3.1 expenses)
+- Migrations: `supabase/migrations/20261104130000_portal_v3_money.sql`,
+  `20261104140000_portal_v3_expenses.sql` (R3.1 expenses) and
+  `20261104150000_portal_v3_job_costing.sql` (R3.2 job costing)
 - Data layer: `src/lib/portal-money.ts`
 - UI: `src/components/portal/v3/` (`money-room.tsx`, `money-quotes.tsx`, `money-invoices.tsx`,
   `money-rate-cards.tsx`, `money-settings.tsx`, `line-editor.tsx`)
@@ -64,6 +65,26 @@ Costs are internal: no client ever sees them, and nothing here pays anybody.
 - VAT and gross are generated columns, so the ledger cannot disagree with itself.
 - Metrics: awaiting value, approved this month, approved overall, reimbursable owed, and VAT on
   approved expenses year to date — a bookkeeping aid, not a VAT return.
+
+## Job costing (R3.2)
+
+Each quote line and invoice line can be pointed at a ticket, so money can be attributed to the job
+that earned it. Attribution survives quote → invoice conversion.
+
+- **Revenue** on a job = its attributed invoice lines on issued (not draft, not void) invoices,
+  discounted per invoice so the attributed money still reconciles with the invoice total.
+- **Cost** on a job = approved expenses linked to that ticket, plus logged `time_entries` priced at
+  `engineer_profiles.hourly_rate`.
+- **Margin** = revenue − expenses − labour, with a percentage that is `null` rather than infinite
+  when nothing has been billed.
+- Anything unattributed is reported separately (unallocated revenue, expenses and hours) instead of
+  being spread across jobs, so a job figure is only ever what somebody explicitly attributed.
+- Hours belonging to an engineer with no rate are surfaced as "unrated" so a margin is never
+  presented as complete when it is not.
+- The whole view requires `finance.margins` (admin by default), because it exposes cost and pay
+  rates.
+
+The Margins tab filters by period (month, 30 days, quarter, year, or explicit dates) and by client.
 
 ## Permissions
 

@@ -1,8 +1,8 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Banknote, BarChart3, FileText, Lock, Radio, ReceiptText, RefreshCw, Settings2, Table2, Wallet } from "lucide-react";
-import { controlApi, describeError, humanise } from "@/lib/portal-v2";
+import { Banknote, BarChart3, FileText, Lock, PieChart, Radio, ReceiptText, RefreshCw, Settings2, Table2, Wallet } from "lucide-react";
+import { controlApi, controlReads, humanise } from "@/lib/portal-v2";
 import { supabase } from "@/lib/supabase-browser";
 import {
   MONEY_FLAGS,
@@ -11,6 +11,7 @@ import {
   moneyApi,
   moneyError,
   type ClientOrg,
+  type JobTicket,
   type MoneyMetrics,
 } from "@/lib/portal-money";
 import { Button, Empty, ErrorNote, Loading, Panel, Pill, Stat } from "@/components/portal/v2/ui";
@@ -18,6 +19,7 @@ import { MoneyQuotes } from "@/components/portal/v3/money-quotes";
 import { MoneyInvoices } from "@/components/portal/v3/money-invoices";
 import { MoneyRateCards } from "@/components/portal/v3/money-rate-cards";
 import { MoneyExpenses } from "@/components/portal/v3/money-expenses";
+import { MoneyMargins } from "@/components/portal/v3/money-margins";
 import { MoneySettings } from "@/components/portal/v3/money-settings";
 
 type Site = { id: string; name: string; organization_id: string };
@@ -28,6 +30,7 @@ const TAB_META: Record<string, { label: string; icon: typeof BarChart3 }> = {
   invoices: { label: "Invoices", icon: ReceiptText },
   rates: { label: "Rate cards", icon: Table2 },
   expenses: { label: "Expenses", icon: Wallet },
+  margins: { label: "Margins", icon: PieChart },
   settings: { label: "Settings", icon: Settings2 },
 };
 
@@ -51,6 +54,7 @@ export function MoneyRoom() {
   const [metrics, setMetrics] = useState<MoneyMetrics | null>(null);
   const [clients, setClients] = useState<ClientOrg[]>([]);
   const [sites, setSites] = useState<Site[]>([]);
+  const [tickets, setTickets] = useState<JobTicket[]>([]);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -71,6 +75,19 @@ export function MoneyRoom() {
       setClients(await moneyApi.clients());
       const { data: siteRows } = await supabase.from("sites").select("id, name, organization_id").order("name");
       setSites((siteRows ?? []) as Site[]);
+      try {
+        const list = await controlReads.tickets();
+        setTickets(
+          list.map((ticket) => ({
+            id: ticket.id,
+            ticket_number: ticket.ticket_number,
+            title: ticket.title,
+            client_org_id: ticket.client_org_id,
+          })),
+        );
+      } catch {
+        setTickets([]);
+      }
     } catch (caught) {
       setError(moneyError(caught).message);
     } finally {
@@ -87,6 +104,7 @@ export function MoneyRoom() {
   const canEditRates = permissions.has("clients.contracts");
   const canLogExpenses = permissions.has("finance.expenses");
   const canApproveExpenses = permissions.has("finance.expenses_approve");
+  const canSeeMargins = permissions.has("finance.margins");
   const canSettings = permissions.has("settings.users");
 
   const tabs = useMemo(() => {
@@ -94,9 +112,10 @@ export function MoneyRoom() {
     if (canManageMoney) next.push("overview", "quotes", "invoices");
     if (canEditRates) next.push("rates");
     if (canLogExpenses) next.push("expenses");
+    if (canSeeMargins) next.push("margins");
     if (canSettings) next.push("settings");
     return next;
-  }, [canManageMoney, canEditRates, canLogExpenses, canSettings]);
+  }, [canManageMoney, canEditRates, canLogExpenses, canSeeMargins, canSettings]);
 
   const activeTab = tabs.includes(tab) ? tab : tabs[0] ?? "";
 
@@ -191,7 +210,14 @@ export function MoneyRoom() {
       {activeTab === "overview" && !metrics && <Loading label="Loading money metrics" />}
 
       {activeTab === "quotes" && (
-        <MoneyQuotes canManage={canManageMoney} flags={flags} clients={clients} sites={sites} onChanged={() => void load()} />
+        <MoneyQuotes
+          canManage={canManageMoney}
+          flags={flags}
+          clients={clients}
+          sites={sites}
+          tickets={tickets}
+          onChanged={() => void load()}
+        />
       )}
 
       {activeTab === "invoices" && (
@@ -201,6 +227,7 @@ export function MoneyRoom() {
           flags={flags}
           clients={clients}
           sites={sites}
+          tickets={tickets}
           onChanged={() => void load()}
         />
       )}
@@ -223,6 +250,8 @@ export function MoneyRoom() {
           onChanged={() => void load()}
         />
       )}
+
+      {activeTab === "margins" && <MoneyMargins clients={clients} />}
 
       {activeTab === "settings" && <MoneySettings flags={flags} onChanged={() => void load()} />}
 

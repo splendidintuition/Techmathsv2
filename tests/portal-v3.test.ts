@@ -7,6 +7,8 @@ import {
   expenseSummaryOf,
   expenseTone,
   expenseVat,
+  jobTotals,
+  marginTone,
   agingBucket,
   blankLine,
   cleanLines,
@@ -19,6 +21,7 @@ import {
   quoteSummaryOf,
   quoteTone,
   type ExpenseRow,
+  type JobMarginRow,
   type InvoiceSummary,
   type QuoteSummary,
 } from "@/lib/portal-money";
@@ -305,5 +308,67 @@ describe("expenses", () => {
     expect(EXPENSE_CATEGORIES).toHaveLength(8);
     expect(EXPENSE_CATEGORIES[0]).toBe("travel");
     expect(EXPENSE_STATUSES).toEqual(["draft", "submitted", "approved", "rejected"]);
+  });
+});
+
+describe("job costing", () => {
+  const job = (over: Partial<JobMarginRow>): JobMarginRow => ({
+    ticket_id: Math.random().toString(36).slice(2),
+    ticket_number: 101,
+    title: "Rack build",
+    status: "completed",
+    client_name: "Northwind",
+    site_name: "Lisbon DC1",
+    revenue_net: 1000,
+    expenses_net: 100,
+    labour_hours: 4,
+    labour_cost: 140,
+    unpriced_hours: 0,
+    margin: 760,
+    margin_pct: 76,
+    ...over,
+  });
+
+  it("tones margins green above 40%, amber above 15%, red below", () => {
+    expect(marginTone(76)).toBe("good");
+    expect(marginTone(40)).toBe("good");
+    expect(marginTone(39.9)).toBe("warn");
+    expect(marginTone(15)).toBe("warn");
+    expect(marginTone(14.9)).toBe("danger");
+    expect(marginTone(-10)).toBe("danger");
+  });
+
+  it("treats a missing margin as neutral rather than a loss", () => {
+    expect(marginTone(null)).toBe("muted");
+    expect(marginTone(undefined)).toBe("muted");
+    expect(marginTone(Number.NaN)).toBe("muted");
+  });
+
+  it("rolls job rows up into totals", () => {
+    const totals = jobTotals([
+      job({ revenue_net: 1000, expenses_net: 100, labour_cost: 140, labour_hours: 4 }),
+      job({ revenue_net: 500, expenses_net: 50, labour_cost: 60, labour_hours: 2, unpriced_hours: 1 }),
+    ]);
+    expect(totals.revenue).toBe(1500);
+    expect(totals.expenses).toBe(150);
+    expect(totals.labourCost).toBe(200);
+    expect(totals.labourHours).toBe(6);
+    expect(totals.margin).toBe(1150);
+    expect(totals.marginPct).toBe(76.7);
+    expect(totals.unpricedHours).toBe(1);
+  });
+
+  it("reports no percentage when nothing was billed", () => {
+    const totals = jobTotals([job({ revenue_net: 0, expenses_net: 50, labour_cost: 20, margin: -70, margin_pct: null })]);
+    expect(totals.revenue).toBe(0);
+    expect(totals.margin).toBe(-70);
+    expect(totals.marginPct).toBeNull();
+  });
+
+  it("handles an empty ledger", () => {
+    const totals = jobTotals([]);
+    expect(totals.revenue).toBe(0);
+    expect(totals.margin).toBe(0);
+    expect(totals.marginPct).toBeNull();
   });
 });

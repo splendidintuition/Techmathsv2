@@ -84,6 +84,9 @@ const MONEY_ERROR_COPY: Record<string, string> = {
   expense_self_approval: "You cannot approve your own expense. Ask another admin.",
   invalid_expense_category: "Pick one of the listed categories.",
   invalid_vat_rate: "The VAT rate must be between 0 and 100.",
+  job_ticket_mismatch: "That job belongs to another client. Pick one of this client's tickets.",
+  invalid_line_kind: "Only quote and invoice lines can be attributed to a job.",
+  invalid_date_range: "The end date cannot be before the start date.",
   client_organization_required: "Choose a client first.",
   not_found: "That record no longer exists.",
 };
@@ -121,6 +124,7 @@ export interface DocumentLine {
   quantity: number;
   unit_price: number;
   line_total?: number;
+  ticket_id?: string | null;
 }
 
 export interface QuoteSummary {
@@ -292,6 +296,50 @@ export interface ExpenseRow {
   created_by_name: string | null;
   is_demo: boolean;
   created_at: string;
+}
+
+export interface JobTicket {
+  id: string;
+  ticket_number: number;
+  title: string;
+  client_org_id: string;
+}
+
+export interface JobMarginRow {
+  ticket_id: string;
+  ticket_number: number;
+  title: string;
+  status: string;
+  client_name: string | null;
+  site_name: string | null;
+  revenue_net: number;
+  expenses_net: number;
+  labour_hours: number;
+  labour_cost: number;
+  unpriced_hours: number;
+  margin: number;
+  margin_pct: number | null;
+}
+
+export interface JobMargins {
+  from: string;
+  to: string;
+  jobs: JobMarginRow[];
+  totals: {
+    revenue_net: number;
+    expenses_net: number;
+    labour_hours: number;
+    labour_cost: number;
+    margin: number;
+    margin_pct: number | null;
+  };
+  unallocated: {
+    revenue_net: number;
+    expenses_net: number;
+    labour_hours: number;
+    labour_cost: number;
+  };
+  generated_at: string;
 }
 
 export interface ExpenseMetrics {
@@ -495,6 +543,43 @@ export function expenseSummaryOf(
   };
 }
 
+/* ------------------------------------------------------------ job costing */
+
+/** Colour for a margin percentage: green above 40%, amber above 15%, red below. */
+export function marginTone(pct: number | null | undefined): Tone {
+  if (pct === null || pct === undefined || Number.isNaN(Number(pct))) return "muted";
+  const value = Number(pct);
+  if (value >= 40) return "good";
+  if (value >= 15) return "warn";
+  return "danger";
+}
+
+/** Client-side roll-up of the job rows, used for tests and the table footer. */
+export function jobTotals(rows: JobMarginRow[]): {
+  revenue: number;
+  expenses: number;
+  labourHours: number;
+  labourCost: number;
+  margin: number;
+  marginPct: number | null;
+  unpricedHours: number;
+} {
+  const sum = (pick: (row: JobMarginRow) => number) => round2(rows.reduce((total, row) => total + Number(pick(row) ?? 0), 0));
+  const revenue = sum((row) => row.revenue_net);
+  const expenses = sum((row) => row.expenses_net);
+  const labourCost = sum((row) => row.labour_cost);
+  const margin = round2(revenue - expenses - labourCost);
+  return {
+    revenue,
+    expenses,
+    labourHours: sum((row) => row.labour_hours),
+    labourCost,
+    margin,
+    marginPct: revenue <= 0 ? null : Math.round((margin / revenue) * 1000) / 10,
+    unpricedHours: sum((row) => row.unpriced_hours),
+  };
+}
+
 /* ------------------------------------------------------------ RPC surface */
 
 export interface ClientOrg {
@@ -570,6 +655,15 @@ export const moneyApi = {
     rpc<ExpenseStatus>("money_review_expense", { p_id: id, p_approve: approve, p_note: note }),
   deleteExpense: (id: string) => rpc<boolean>("money_delete_expense", { p_id: id }),
   expenseMetrics: () => rpc<ExpenseMetrics>("money_expense_metrics"),
+
+  jobMargins: (from?: string | null, to?: string | null, organizationId?: string | null) =>
+    rpc<JobMargins>("money_job_margins", {
+      p_from: from ?? null,
+      p_to: to ?? null,
+      p_organization_id: organizationId ?? null,
+    }),
+  setLineJob: (kind: "quote" | "invoice", lineId: string, ticketId: string | null) =>
+    rpc<boolean>("money_set_line_job", { p_kind: kind, p_line_id: lineId, p_ticket_id: ticketId }),
 
   seedDemo: () => rpc<{ client: string; quote: string; invoice: string }>("money_seed_demo"),
 };

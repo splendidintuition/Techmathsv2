@@ -16,6 +16,7 @@ import {
   type DocumentLine,
   type InvoiceDetail,
   type InvoiceSummary,
+  type JobTicket,
   MONEY_FLAGS,
   type MoneyFlags,
   type PaymentMethod,
@@ -46,6 +47,7 @@ export function MoneyInvoices({
   flags,
   clients,
   sites,
+  tickets,
   onChanged,
 }: {
   canManage: boolean;
@@ -53,6 +55,7 @@ export function MoneyInvoices({
   flags: MoneyFlags;
   clients: ClientOrg[];
   sites: Site[];
+  tickets: JobTicket[];
   onChanged: () => void;
 }) {
   const [rows, setRows] = useState<InvoiceSummary[]>([]);
@@ -100,6 +103,16 @@ export function MoneyInvoices({
       setNote(moneyError(caught).message);
     } finally {
       setBusy(false);
+    }
+  };
+
+  const attributeLine = async (lineId: string | undefined, ticketId: string | null) => {
+    if (!lineId || !detail) return;
+    try {
+      await moneyApi.setLineJob("invoice", lineId, ticketId);
+      setDetail(await moneyApi.getInvoice(detail.id));
+    } catch (caught) {
+      setNote(moneyError(caught).message);
     }
   };
 
@@ -415,6 +428,23 @@ export function MoneyInvoices({
                     <span className="font-mono text-[9.5px] uppercase tracking-[0.1em] text-[#5F6F84]">
                       {line.quantity} {line.unit} × {formatMoney(line.unit_price, detail.currency)}
                     </span>
+                    {canManage && line.id && detail.status !== "void" && (
+                      <select
+                        value={line.ticket_id ?? ""}
+                        onChange={(event) => void attributeLine(line.id, event.target.value || null)}
+                        className="mt-1 max-w-[240px] rounded-[8px] border border-white/10 bg-[#0B1119] px-2 py-1 font-mono text-[9.5px] uppercase tracking-[0.08em] text-[#9AA9BC]"
+                        aria-label={`Job for ${line.description}`}
+                      >
+                        <option value="">no job</option>
+                        {tickets
+                          .filter((ticket) => ticket.client_org_id === detail.organization_id)
+                          .map((ticket) => (
+                            <option key={ticket.id} value={ticket.id}>
+                              T-{ticket.ticket_number} · {ticket.title.slice(0, 28)}
+                            </option>
+                          ))}
+                      </select>
+                    )}
                   </span>
                   <span className="shrink-0 font-mono text-[11.5px] text-[#E8EEF9]">{formatMoney(Number(line.line_total ?? 0), detail.currency)}</span>
                 </li>
