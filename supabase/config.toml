@@ -18,8 +18,8 @@ port = 54323
 
 [auth]
 enabled = true
-site_url = "http://localhost:5173"
-additional_redirect_urls = ["http://localhost:5173/**"]
+site_url = "https://portal.techmaths-dc.com"
+additional_redirect_urls = ["https://portal.techmaths-dc.com/**", "http://localhost:3000/**", "http://localhost:8889/**"]
 jwt_expiry = 3600
 enable_signup = false
 

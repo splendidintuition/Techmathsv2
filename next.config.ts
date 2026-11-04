@@ -2,6 +2,16 @@ import type { NextConfig } from "next";
 
 const isDev = process.env.NODE_ENV === "development";
 
+const supabaseHost = process.env.NEXT_PUBLIC_SUPABASE_URL
+  ? (() => {
+      try {
+        return new URL(process.env.NEXT_PUBLIC_SUPABASE_URL).origin;
+      } catch {
+        return "";
+      }
+    })()
+  : "";
+
 const securityHeaders = [
   { key: "X-Content-Type-Options", value: "nosniff" },
   // The Arena development preview is embedded cross-origin. Production keeps
@@ -20,9 +30,9 @@ const securityHeaders = [
       // Next's development refresh runtime uses eval; never allow it in prod.
       `script-src 'self' 'unsafe-inline'${isDev ? " 'unsafe-eval'" : ""}`,
       "style-src 'self' 'unsafe-inline'",
-      "img-src 'self' data: blob:",
+      "img-src 'self' data: blob: https://*.supabase.co",
       "font-src 'self' data:",
-      `connect-src 'self'${isDev ? " ws: wss:" : ""}`,
+      `connect-src 'self' https://*.supabase.co wss://*.supabase.co ${supabaseHost}${isDev ? " ws: wss:" : ""}`.trim(),
       isDev ? "frame-ancestors 'self' https://arena.ai https://*.arena.ai https://*.e2b.app" : "frame-ancestors 'none'",
       "base-uri 'self'",
       "form-action 'self'",

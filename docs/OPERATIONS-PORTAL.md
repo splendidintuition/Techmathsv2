@@ -29,13 +29,11 @@ Supabase Auth Site URL is set to `https://portal.techmaths-dc.com`; the allow-li
 
 ## Subdomain activation checklist
 
-1. In the existing Netlify site, add `portal.techmaths-dc.com` as a production domain alias.
-2. At the DNS provider for `techmaths-dc.com`, add the CNAME record Netlify specifies for the `portal` host. Wait for DNS verification and Netlify TLS provisioning.
-3. In Netlify’s production environment, set `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY` (publishable only), and `NEXT_PUBLIC_PORTAL_URL=https://portal.techmaths-dc.com`. Keep the existing `NETLIFY_DB_URL` required by the marketing site's current build.
+1. In the existing Netlify site dashboard, add `portal.techmaths-dc.com` as a production domain alias (**Site configuration** → **Domain management** → **Custom domains** → **Add domain alias**). With Netlify Managed DNS enabled, the DNS record and TLS certificate are automatically provisioned.
+2. In Netlify's production environment, `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` are now configured, alongside `NEXT_PUBLIC_PORTAL_URL=https://portal.techmaths-dc.com`.
+3. Content Security Policy headers in `next.config.ts` permit `connect-src` and `img-src` to `https://*.supabase.co` and `wss://*.supabase.co`.
 4. Deploy the repo changes. The host middleware rewrites the portal subdomain's `/` to the `/portal` application route; the apex domain continues to serve the marketing homepage.
-5. The Supabase Auth Site URL and allowed redirect list are already set to the portal subdomain plus `http://localhost:3000/**` for development.
-
-DNS and Netlify domain alias changes are not performed by this repository change because no Netlify/DNS access is connected.
+5. The Supabase Auth Site URL and allowed redirect list are configured for `https://portal.techmaths-dc.com` plus local development ports.
 
 ## Website-to-portal request handoff
 

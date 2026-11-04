@@ -26,6 +26,19 @@ describe("isSupabaseConfigured", () => {
   });
 });
 
+describe("CSP configuration", () => {
+  it("includes supabase connect and image directives in next.config headers", async () => {
+    const nextConfig = (await import("../next.config")).default;
+    if (typeof nextConfig.headers === "function") {
+      const headers = await nextConfig.headers();
+      const cspHeader = headers[0]?.headers?.find((h: { key: string }) => h.key === "Content-Security-Policy");
+      expect(cspHeader).toBeDefined();
+      expect(cspHeader?.value).toContain("https://*.supabase.co");
+      expect(cspHeader?.value).toContain("wss://*.supabase.co");
+    }
+  });
+});
+
 describe("middleware", () => {
   it("rewrites / to /portal when host is portal subdomain", () => {
     const req = new NextRequest("https://portal.techmaths-dc.com/", {
