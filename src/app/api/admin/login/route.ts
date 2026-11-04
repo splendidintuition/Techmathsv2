@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
+import { isValidAdminPasscode } from "@/lib/admin-auth";
 
 export const runtime = "nodejs";
 
@@ -20,7 +21,7 @@ export async function POST(req: Request) {
   }
 
   const expected = process.env.ADMIN_TOKEN;
-  if (!expected || parsed.data.token !== expected) {
+  if (!expected || !isValidAdminPasscode(parsed.data.token)) {
     return NextResponse.json({ ok: false, error: "Incorrect passcode." }, { status: 401 });
   }
 
