@@ -6,16 +6,8 @@ import { LeadsTable } from "@/components/leads-table";
 import { Logo } from "@/components/logo";
 import { PlaceholderTag } from "@/components/ui";
 import { PLACEHOLDER_REGISTER } from "@/lib/content/site";
-import {
-  leadStats,
-  listInsights,
-  listLeads,
-  listProjects,
-  listServices,
-  serviceTitleMap,
-  subscriberCount,
-  trafficStats,
-} from "@/lib/queries";
+import { listInsights, listProjects, listServices, serviceTitleMap } from "@/lib/queries";
+import { leadStats, listLeads, subscriberCount, trafficStats } from "@/lib/store";
 
 export const metadata: Metadata = {
   title: "Admin console",
@@ -32,16 +24,28 @@ export default async function AdminPage() {
     redirect("/admin/login?next=/admin");
   }
 
-  const [leads, stats, traffic, services, projects, insights] = [
-    listLeads(200),
-    leadStats(),
-    trafficStats(30),
-    listServices(),
-    listProjects(),
-    listInsights(),
-  ];
+  const services = listServices();
+  const projects = listProjects();
+  const insights = listInsights();
   const serviceTitles = serviceTitleMap();
-  const subscribers = subscriberCount();
+
+  let leads: Awaited<ReturnType<typeof listLeads>> = [];
+  let stats: Awaited<ReturnType<typeof leadStats>> = { total: 0, byStatus: [], last30: 0 };
+  let traffic: Awaited<ReturnType<typeof trafficStats>> = { views: [], topPaths: [] };
+  let subscribers = 0;
+  let dbError: string | null = null;
+  try {
+    [leads, stats, traffic, subscribers] = await Promise.all([
+      listLeads(200),
+      leadStats(),
+      trafficStats(30),
+      subscriberCount(),
+    ]);
+  } catch (err) {
+    // Show the console with a clear warning instead of crashing the whole page.
+    console.error("[admin] could not load operational data", err);
+    dbError = "The lead database could not be reached. Figures below may be incomplete — reload in a moment.";
+  }
   const placeholders = projects.filter((p) => p.isPlaceholder).length;
   const maxViews = Math.max(1, ...traffic.views.map((v) => v.n));
 
@@ -73,6 +77,12 @@ export default async function AdminPage() {
           <LogoutButton />
         </div>
       </header>
+
+      {dbError && (
+        <p role="alert" className="mt-6 rounded-xl border border-[color:var(--tm-warn)] px-4 py-3 text-[0.84rem] text-[color:var(--tm-warn)]">
+          {dbError}
+        </p>
+      )}
 
       {/* KPIs */}
       <div className="mt-8 grid gap-px overflow-hidden rounded-2xl border border-[color:var(--tm-line)] bg-[color:var(--tm-line)] sm:grid-cols-2 lg:grid-cols-5">
@@ -152,8 +162,8 @@ export default async function AdminPage() {
               ))}
             </ul>
             <p className="mt-4 text-[0.78rem] leading-relaxed text-mute">
-              Content is seeded from versioned TypeScript and stored in SQLite. Rows are only inserted when
-              missing, so edits made here survive a redeploy.
+              Content is versioned in the codebase and published with each deploy. Leads, subscribers and
+              traffic are stored in Netlify Database.
             </p>
           </div>
 

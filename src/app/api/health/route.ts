@@ -1,14 +1,6 @@
 import { NextResponse } from "next/server";
-import { getDb } from "@/lib/db";
-import {
-  leadStats,
-  listInsights,
-  listLeads,
-  listProjects,
-  listServices,
-  subscriberCount,
-  trafficStats,
-} from "@/lib/queries";
+import { listInsights, listProjects, listServices } from "@/lib/queries";
+import { leadStats, listLeads, pingDatabase, subscriberCount, trafficStats } from "@/lib/store";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -18,33 +10,28 @@ export async function GET() {
   const started = Date.now();
   const checks: Record<string, unknown> = {};
 
+  checks.content = {
+    services: listServices().length,
+    projects: listProjects().length,
+    insights: listInsights().length,
+  };
+
   try {
-    const row = getDb().prepare(`SELECT COUNT(*) AS n FROM services`).get() as { n: number };
-    checks.database = { ok: true, services: row.n };
+    await pingDatabase();
+    checks.database = { ok: true };
+    const [stats, subscribers, recent, traffic] = await Promise.all([
+      leadStats(),
+      subscriberCount(),
+      listLeads(5),
+      trafficStats(30),
+    ]);
+    checks.leads = { total: stats.total, last30Days: stats.last30, subscribers };
+    checks.recentLeads = recent.map((l) => ({ reference: l.reference, createdAt: l.createdAt, status: l.status }));
+    checks.traffic = traffic;
   } catch (err) {
     checks.database = { ok: false, error: err instanceof Error ? err.message : String(err) };
   }
 
-  const dbOk = (checks.database as { ok?: boolean }).ok === true;
-  if (dbOk) {
-    try {
-      checks.content = {
-        services: listServices().length,
-        projects: listProjects().length,
-        insights: listInsights().length,
-      };
-      const stats = leadStats();
-      checks.leads = { total: stats.total, last30Days: stats.last30, subscribers: subscriberCount() };
-      checks.recentLeads = listLeads(5).map((l) => ({
-        reference: l.reference,
-        createdAt: l.createdAt,
-        status: l.status,
-      }));
-      checks.traffic = trafficStats(30);
-    } catch (err) {
-      checks.database = { ok: false, error: err instanceof Error ? err.message : String(err) };
-    }
-  }
   checks.env = {
     siteUrl: process.env.NEXT_PUBLIC_SITE_URL ?? "(unset)",
     leadNotifyEmail: process.env.LEAD_NOTIFY_EMAIL ?? "(unset)",

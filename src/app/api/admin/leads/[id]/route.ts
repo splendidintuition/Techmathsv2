@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
-import { setLeadStatus } from "@/lib/queries";
+import { setLeadStatus } from "@/lib/store";
 
 export const runtime = "nodejs";
 
@@ -41,6 +41,9 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
     return NextResponse.json({ ok: false, error: "Unknown status value." }, { status: 422 });
   }
 
-  setLeadStatus(id, parsed.data.status);
+  const found = await setLeadStatus(id, parsed.data.status);
+  if (!found) {
+    return NextResponse.json({ ok: false, error: "Lead not found." }, { status: 404 });
+  }
   return NextResponse.json({ ok: true, id, status: parsed.data.status });
 }

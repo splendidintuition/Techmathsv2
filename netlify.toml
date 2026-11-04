@@ -1,11 +1,7 @@
 # Netlify must use the Next.js runtime, not a static-only export: this app has
 # server-rendered routes and API handlers.
 [build]
-  # better-sqlite3 is a native addon. A cached node_modules compiled under a
-  # different Node version (e.g. the site default, Node 24 / ABI 137) fails to
-  # load under NODE_VERSION below (Node 22 / ABI 127), so always rebuild it
-  # against the active Node before building.
-  command = "npm rebuild better-sqlite3 && npm run build"
+  command = "npm run build"
   publish = ".next"
 
 [build.environment]
@@ -16,6 +12,5 @@
 [[plugins]]
   package = "@netlify/plugin-nextjs"
 
-# IMPORTANT: serverless function filesystems are not a persistent lead database.
-# Configure durable storage before enabling production quote intake. The API
-# deliberately returns 503 (not a false success) if it cannot persist a request.
+# Leads, subscribers and analytics events are stored in Netlify Database.
+# Migrations live in netlify/database/migrations and are applied on deploy.

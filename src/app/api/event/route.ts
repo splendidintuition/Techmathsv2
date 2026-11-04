@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { trackEvent } from "@/lib/queries";
+import { trackEvent } from "@/lib/store";
 
 export const runtime = "nodejs";
 
@@ -28,6 +28,12 @@ export async function POST(req: Request) {
     }
   }
 
-  trackEvent(type, { path, referrer: referrerHost });
+  try {
+    await trackEvent(type, { path, referrer: referrerHost });
+  } catch (err) {
+    // Analytics must never break the page; log and move on.
+    console.error("[event] could not record event", err);
+    return NextResponse.json({ ok: false }, { status: 503 });
+  }
   return NextResponse.json({ ok: true });
 }
