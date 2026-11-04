@@ -311,3 +311,47 @@ bookkeeping aid rather than a return.
 
 **Not covered:** receipt file uploads (claims carry a URL for now) and any payout flow — approving a
 reimbursable claim records a debt, it does not pay it.
+
+## Agent 16 — Database engineer (R3.2 job costing)
+
+**Brief:** say what each job actually earned, without inventing revenue allocation.
+
+Two nullable `ticket_id` columns (`quote_lines`, `invoice_lines`) and two functions:
+`money_set_line_job` to attribute a single line (validated against the client that owns the ticket,
+refused on void invoices, audited) and `money_job_margins` to report per-ticket revenue, labour,
+approved expenses and margin for a date range. `money_quote_to_invoice` was replaced so attribution
+survives conversion, and the document reads now return the job on each line.
+
+**Design decisions:** revenue is attributed per line and discounted per invoice, so it reconciles
+with the invoice total instead of double-counting. Unattributed money is reported as unallocated
+rather than spread across jobs. Labour comes from `time_entries` priced at
+`engineer_profiles.hourly_rate`, and hours without a rate are counted separately — a margin is never
+silently overstated. The whole report sits behind `finance.margins`.
+
+## Agent 17 — Frontend engineer (margins tab)
+
+**Brief:** answer "did this job make money?" in one screen.
+
+A Margins tab with period presets (month, 30 days, quarter, year, or explicit dates) and a client
+filter. Four headline numbers, a per-job table with revenue, labour hours and cost, expenses, margin
+and a colour-graded margin percentage, plus a footer that totals the rows. A separate panel shows the
+unallocated revenue, expenses and labour so a bookkeeper can see what is not yet attributed. Quote
+and invoice detail views gained a per-line job selector, which writes through to the database and
+re-reads the document.
+
+## Agent 18 — QA / release engineer (R3.2)
+
+| Check | Command | Result |
+| --- | --- | --- |
+| Types | `npx tsc --noEmit` | clean |
+| Tests | `npx vitest run` | 129/129 (5 new margin assertions) |
+| Build | `npm run build` | compiled successfully |
+| Live database | SQL as the admin account | attribution, labour cost and roll-up verified, then cleaned up |
+
+Live proof: a demo invoice line (€544) attributed to a ticket with two approved hours at €35/h
+produced revenue €544, labour €70, margin €474 and 87.1%; the two unattributed lines and the
+unattributed €84.50 travel claim appeared under "what is not attributed". The QA ticket, time entry
+and rate were removed afterwards.
+
+**Not covered:** overhead allocation, multi-currency conversion (everything is reported in the
+document currency), and any payout calculation.
