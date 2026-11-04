@@ -14,7 +14,7 @@ import { Magnetic, MaskLines, Parallax, Reveal } from "@/components/motion";
 import { ProcessStory } from "@/components/process-story";
 import { ServiceGrid } from "@/components/service-grid";
 import { Btn, Pill, PlaceholderTag, SectionHead, StatBlock } from "@/components/ui";
-import { CLIENT_LOGOS, COMPANY, HOME_FAQS, PROCESS, STATS, TRUST_POINTS } from "@/lib/content/site";
+import { INDUSTRY_NAMES, COMPANY, HOME_FAQS, PROCESS, STATS, TRUST_POINTS } from "@/lib/content/site";
 import { listProjects, listServices } from "@/lib/queries";
 import { absoluteUrl, breadcrumbLd, faqLd, jsonLd, organizationLd } from "@/lib/seo";
 
@@ -120,7 +120,6 @@ export default function HomePage() {
                   value={s.value}
                   suffix={s.suffix}
                   label={s.label}
-                  note={s.note === "placeholder" ? "illustrative" : undefined}
                 />
               ))}
             </div>
@@ -138,10 +137,13 @@ export default function HomePage() {
           </div>
         </div>
 
-        {/* Client logo strip — neutral placeholders until real logos are supplied */}
+        {/* Industries served */}
         <div className="marquee-mask overflow-hidden border-t border-[color:var(--tm-line)] py-6">
+          <p className="shell mb-5 font-mono text-[0.66rem] uppercase tracking-[0.18em] text-mute">
+            Industries served
+          </p>
           <div className="marquee-track flex w-max items-center gap-14">
-            {[...CLIENT_LOGOS, ...CLIENT_LOGOS].map((name, i) => (
+            {[...INDUSTRY_NAMES, ...INDUSTRY_NAMES].map((name, i) => (
               <span
                 key={`${name}-${i}`}
                 className="flex shrink-0 items-center gap-2.5 font-mono text-[0.66rem] uppercase tracking-[0.18em] text-mute"

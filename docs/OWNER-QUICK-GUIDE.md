@@ -34,7 +34,7 @@ The preview passcode is `ADMIN`, as requested. It is easy to remember but **not 
 - General enquiries and career expressions of interest: **info@techmaths-dc.com**
 - Sales and quote requests: **sales@techmaths-dc.com**
 - Helpdesk: **helpdesk@techmaths-dc.com**
-- The NIF/registration number was not supplied, so it is not shown.
+- NIF / registration number: **517451859**.
 - Public website domain: **techmaths-dc.com**. Canonical SEO URLs are set to `https://techmaths-dc.com`.
 
 ## Careers
