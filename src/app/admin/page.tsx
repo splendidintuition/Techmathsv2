@@ -188,6 +188,7 @@ export default async function AdminPage() {
               {[
                 ["Site URL", process.env.NEXT_PUBLIC_SITE_URL ?? "(unset — defaults to techmaths-dc.com)"],
                 ["Lead notify email", process.env.LEAD_NOTIFY_EMAIL ?? "(unset)"],
+                ["HubSpot CRM", process.env.HUBSPOT_ACCESS_TOKEN ? "configured" : "(setup pending)"],
                 ["CRM webhook", process.env.LEAD_WEBHOOK_URL ? "configured" : "(unset)"],
                 ["Analytics", process.env.NEXT_PUBLIC_ANALYTICS_DOMAIN ?? "(unset — first-party only)"],
               ].map(([k, v]) => (

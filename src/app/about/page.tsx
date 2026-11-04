@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { FaqList } from "@/components/faq-list";
-import { IconGlobe, IconPin, IconShield, IconUsers } from "@/components/icons";
+import { IconGlobe, IconPin, IconShield } from "@/components/icons";
 import { Reveal } from "@/components/motion";
 import { Btn, PlaceholderTag, Pill, SectionHead } from "@/components/ui";
 import { COMPANY, PLACEHOLDER_REGISTER, STATS } from "@/lib/content/site";
@@ -8,9 +8,9 @@ import { listCoverage, listTeam, listTestimonials } from "@/lib/queries";
 import { breadcrumbLd, buildMetadata, jsonLd } from "@/lib/seo";
 
 export const metadata: Metadata = buildMetadata({
-  title: "About and team",
+  title: "About Tech Maths",
   description:
-    "Tech Maths is a specialist data center engineering partner headquartered in Lisbon, with delivery teams across Europe, the UK, the United States and India. Meet the engineers and the standards they work to.",
+    "Tech Maths is a specialist data center engineering partner headquartered in Lisbon, with delivery teams across Europe, the UK, the United States and India. Learn about our approach and delivery standards.",
   path: "/about",
   keywords: ["data center engineering company", "data center services company Lisbon", "data center engineers Portugal"],
 });
@@ -86,9 +86,6 @@ export default function AboutPage() {
                 <span className="text-accent">{s.suffix}</span>
               </p>
               <p className="mt-3 text-[0.85rem] text-mute">{s.label}</p>
-              <p className="mt-1 font-mono text-[0.58rem] uppercase tracking-[0.14em] text-mute">
-                illustrative figure
-              </p>
             </Reveal>
           ))}
         </div>
@@ -112,7 +109,8 @@ export default function AboutPage() {
         </div>
       </section>
 
-      {/* Team */}
+      {/* Publish only verified team profiles. */}
+      {team.length > 0 && (
       <section className="border-y border-[color:var(--tm-line)] bg-[color:var(--tm-ink-2)] py-20 sm:py-24">
         <div className="shell">
           <div className="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
@@ -121,7 +119,6 @@ export default function AboutPage() {
               title="Named engineers, not a labour pool"
               lead="Repeat clients get the same people back on site, which is why site familiarity compounds instead of resetting on every visit."
             />
-            <PlaceholderTag label="Profiles illustrative" />
           </div>
 
           <ul className="mt-12 grid gap-px overflow-hidden rounded-2xl border border-[color:var(--tm-line)] bg-[color:var(--tm-line)] sm:grid-cols-2 lg:grid-cols-3">
@@ -158,12 +155,10 @@ export default function AboutPage() {
               </Reveal>
             ))}
           </ul>
-          <p className="mt-6 text-[0.8rem] text-mute">
-            Photographs, bios and certification evidence are pending from the company — see the pre-launch
-            checklist in the admin console.
-          </p>
         </div>
       </section>
+
+      )}
 
       {/* Coverage + offices */}
       <section className="shell py-20 sm:py-24">
@@ -186,10 +181,9 @@ export default function AboutPage() {
                 </li>
               ))}
             </ul>
-            <div className="mt-6 grid gap-4 sm:grid-cols-3">
+            <div className="mt-6 grid gap-4 sm:grid-cols-2">
               {[
                 { icon: IconGlobe, v: `${european.length}`, l: "European countries" },
-                { icon: IconUsers, v: `${team.length}`, l: "named leads" },
                 { icon: IconShield, v: "4h", l: "quote response" },
               ].map(({ icon: Icon, v, l }) => (
                 <div key={l} className="card-surface flex items-center gap-3 p-4">

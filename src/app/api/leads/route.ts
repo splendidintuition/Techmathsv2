@@ -1,4 +1,5 @@
 import crypto from "node:crypto";
+import { syncLeadToHubSpot } from "@/lib/hubspot";
 import { NextResponse, type NextRequest } from "next/server";
 import { createLead, listLeads } from "@/lib/store";
 import type { Lead } from "@/lib/types";
@@ -83,6 +84,13 @@ export async function POST(req: NextRequest) {
       },
       { status: 503, headers: { "Cache-Control": "no-store" } },
     );
+  }
+
+  try {
+    await syncLeadToHubSpot(lead);
+  } catch (error) {
+    // The enquiry remains in Netlify Database for the delivery desk.
+    console.error("[leads] HubSpot sync failed", error instanceof Error ? error.message : "request failed");
   }
 
   // Optional CRM/webhook hand-off. Failures are logged, never surfaced to the user.

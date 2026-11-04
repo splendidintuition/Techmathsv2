@@ -96,7 +96,7 @@ export function listCoverage(): CoverageCountry[] {
 /* ------------------------------------------------------- team / testimonials */
 
 export function listTeam(): TeamMember[] {
-  return [...TEAM];
+  return TEAM.filter((member) => !member.isPlaceholder);
 }
 
 export function listTestimonials(): Testimonial[] {

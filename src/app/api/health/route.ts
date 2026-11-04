@@ -35,6 +35,7 @@ export async function GET() {
   checks.env = {
     siteUrl: process.env.NEXT_PUBLIC_SITE_URL ?? "(unset)",
     leadNotifyEmail: process.env.LEAD_NOTIFY_EMAIL ?? "(unset)",
+    hubspotConfigured: Boolean(process.env.HUBSPOT_ACCESS_TOKEN),
     webhookConfigured: Boolean(process.env.LEAD_WEBHOOK_URL),
     analyticsConfigured: Boolean(process.env.NEXT_PUBLIC_ANALYTICS_DOMAIN),
   };

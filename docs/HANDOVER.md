@@ -8,10 +8,10 @@ owner have now been entered. The remaining checklist is rendered inside `/admin`
 
 | # | Item | Where to change |
 | --- | --- | --- |
-| 1 | Company NIF / registration number (not supplied) | `src/lib/content/site.ts` → `COMPANY.registration` |
+| 1 | Company NIF / registration number supplied and updated: 517451859 | `src/lib/content/site.ts` → `COMPANY.registration` |
 | 2 | Contact details supplied and updated: info, sales, helpdesk, phone and Lisbon-area address | `src/lib/content/site.ts` → `COMPANY` |
-| 3 | Public website domain confirmed as `techmaths-dc.com`; point DNS and TLS to production hosting before launch | `.env.local` → `NEXT_PUBLIC_SITE_URL` |
-| 4 | Sales notification routes to `sales@techmaths-dc.com`; optional CRM webhook remains unconfigured | `.env.local` → `LEAD_NOTIFY_EMAIL`, `LEAD_WEBHOOK_URL` |
+| 3 | Canonical URL verified as `https://techmaths-dc.com` in project configuration and SEO metadata | `.env.local` → `NEXT_PUBLIC_SITE_URL` |
+| 4 | Sales notification routes to `sales@techmaths-dc.com`; HubSpot Free CRM integration added; credentials configured for production and deploy previews; live verification pending (the generic webhook remains optional) | `.env.local` → `LEAD_NOTIFY_EMAIL`, `LEAD_WEBHOOK_URL` |
 | 5 | Admin passcode and cookie secret | `.env.local` → `ADMIN_TOKEN`, `ADMIN_COOKIE_SECRET` |
 | 6 | Privacy, cookie and terms review by qualified counsel in PT/UK/US/IN | `src/app/privacy-policy`, `cookie-policy`, `terms-of-service` |
 
@@ -23,12 +23,12 @@ The legal pages are drafting templates written to be readable, not substitutes f
 | --- | --- | --- |
 | 7 | 8 case studies | Written in full, flagged on-page with an "Illustrative reference" marker |
 | 8 | 5 testimonials | Written, flagged as illustrative |
-| 9 | Client logos | Neutral placeholders — no invented brand names |
-| 10 | 6 team profiles | Written, flagged; initials shown instead of photographs |
-| 11 | Headline figures (28 / 380+ / 60+ / 4h) | Labelled "illustrative" in the trust strip |
+| 9 | Industries served | Owner approved neutral industry names in place of client logos; labelled “Industries served” |
+| 10 | 6 draft team profiles | Hidden from public display at the owner’s request until real details are ready; only verified profiles are published |
+| 11 | Headline figures (28 / 85 / 60+ / 4h) | Confirmed by the owner; illustrative labels removed |
 | 12 | Certifications & insurance documents | Referenced in copy; PDFs not supplied |
 
-Replace via `src/lib/content/projects.ts`, `site.ts` (`TESTIMONIALS`, `CLIENT_LOGOS`, `TEAM`,
+Replace via `src/lib/content/projects.ts`, `site.ts` (`TESTIMONIALS`, `TEAM`,
 `STATS`) — or edit the rows in the database, which survives a redeploy. Set `isPlaceholder` to
 false per record and the on-page marker disappears.
 
@@ -74,3 +74,7 @@ false per record and the on-page marker disappears.
 - The 404 page, legal pages and admin console are excluded from the sitemap and `robots.txt`.
 - Analytics counts only visitors who accept in the consent banner, so totals understate traffic
   by design.
+
+## HubSpot CRM
+
+Saved, non-spam quote requests create or update a HubSpot contact by email and attach an enquiry note. Contact details and quote requirements are sent server-side; contacts are not enrolled in marketing. Use a HubSpot private app access token with `crm.objects.contacts.write` access, configured securely as `HUBSPOT_ACCESS_TOKEN`. The integration uses the standard CRM contacts and notes APIs and does not require paid HubSpot workflows. Failed syncs leave the original enquiry available in the Netlify-backed admin lead queue; automatic retries are not implemented. Credentials were configured for production and deploy previews. Keep the HubSpot checklist item open until a live enquiry has been verified.

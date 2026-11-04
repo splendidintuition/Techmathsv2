@@ -11,7 +11,7 @@ import type { CoverageCountry, Industry, TeamMember, Testimonial } from "../type
 export const COMPANY = {
   name: "Tech Maths", // Brand name
   legalName: "Splendidintuition Lda",
-  registration: "", // NIF/registration number not supplied yet
+  registration: "517451859",
   tagline: "Hands-on data center engineering, anywhere you build.",
   positioning:
     "We are a specialist data center delivery partner. Our engineers build racks, pull and certify cable, install and configure servers and networks, commission the result and stay on call afterwards — in Lisbon, across Europe, and in the UK, US and India.",
@@ -37,13 +37,13 @@ export const COMPANY = {
 
 /**
  * Headline figures for the trust strip.
- * PLACEHOLDER: these must be replaced with audited figures before launch.
+ * Confirmed by the company owner before launch.
  */
 export const STATS = [
-  { value: "28", label: "countries covered", suffix: "", note: "placeholder" },
-  { value: "380", label: "projects delivered", suffix: "+", note: "placeholder" },
-  { value: "60", label: "field engineers", suffix: "+", note: "placeholder" },
-  { value: "4h", label: "average quote response", suffix: "", note: "placeholder" },
+  { value: "28", label: "countries covered", suffix: "" },
+  { value: "85", label: "projects delivered", suffix: "" },
+  { value: "60", label: "field engineers", suffix: "+" },
+  { value: "4h", label: "average quote response", suffix: "" },
 ] as const;
 
 export const TRUST_POINTS = [
@@ -366,8 +366,8 @@ export const TESTIMONIALS: Testimonial[] = [
   },
 ];
 
-/** Client logo strip — neutral placeholders, no invented brand names. */
-export const CLIENT_LOGOS = [
+/** Industries served — neutral sector names approved for launch. */
+export const INDUSTRY_NAMES = [
   "Colocation operator",
   "Hyperscale provider",
   "Telecom operator",
@@ -410,13 +410,8 @@ export const HOME_FAQS = [
  * Rendered in the admin console as a pre-launch checklist.
  */
 export const PLACEHOLDER_REGISTER = [
-  { item: "Company NIF / registration number", where: "src/lib/content/site.ts → COMPANY.registration" },
-  { item: "Headline figures in the trust strip (28 / 380 / 60 / 4h)", where: "src/lib/content/site.ts → STATS" },
   { item: "Case studies — all 8 are illustrative and flagged on-page", where: "src/lib/content/projects.ts" },
   { item: "Testimonials — all 5 are illustrative and flagged on-page", where: "src/lib/content/site.ts → TESTIMONIALS" },
-  { item: "Client logos — neutral placeholders, no invented brands", where: "src/lib/content/site.ts → CLIENT_LOGOS" },
-  { item: "Team bios, photographs and certifications", where: "src/lib/content/site.ts → TEAM" },
   { item: "Certifications and insurance documents (PDFs)", where: "public/downloads/" },
-  { item: "Optional CRM webhook", where: ".env.local → LEAD_WEBHOOK_URL" },
-  { item: "Canonical domain for SEO metadata", where: ".env.local → NEXT_PUBLIC_SITE_URL" },
+  { item: "HubSpot CRM connection — live verification pending", where: "Server environment → HUBSPOT_ACCESS_TOKEN" },
 ];
