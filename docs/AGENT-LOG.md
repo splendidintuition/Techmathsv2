@@ -157,3 +157,61 @@ ANSI/TIA-568.2-D, TIA-1152 and NFPA 70E.
 Colour contrast — jsdom has no layout engine, so axe's contrast rules are disabled in the
 automated run. Lighthouse performance likewise needs a real browser. Both are on the
 pre-launch checklist in `docs/HANDOVER.md`.
+
+---
+
+## Agent 07 — Database engineer (Release 2 schema)
+
+**Brief:** give the operational modules real storage without breaking Release 1.
+
+**Output:** `supabase/migrations/20261104120000_portal_v2_control.sql` — additive only: four
+enums, eleven tables, 48 seeded permission keys, 27 functions, 22 policies, grants and a
+tagged demo dataset.
+
+**What the audit found before any code was written**
+
+| Finding | Severity | Resolution |
+| --- | --- | --- |
+| The live database had four migrations, but the repo's `20261104061500_wave2_wave3_operations.sql` was never among them — so `send_ticket_message`, `log_time_entry` and `approve_time_entry` did not exist and Wave 2/3 screens failed at runtime | blocking | Re-asserted all three RPCs (idempotent `create or replace`) inside the new migration; confirmed present in `pg_proc` afterwards |
+| The live project also carried an `admin_management_rpcs` migration with no file in the repo, so the repo was *not* a faithful record of the database | serious | Dumped the real column list, enums and helper bodies first, then wrote the migration against the remote rather than against the repo's assumptions |
+| Four SQL defects in the draft (reserved-word alias `as row`, `UNION ALL` branches with bare `LIMIT`, operator precedence in `generate_days`, non-idempotent triggers) | blocking | Fixed before applying; the migration was applied in six atomic chunks and each returned without error |
+
+**Verification:** `schema_migrations` now lists `20261104120000`; `public` holds 24 tables,
+51 policies and 39 functions; `permission_registry` holds 48 keys.
+
+## Agent 08 — Frontend engineer (control console)
+
+**Brief:** an admin console that looks like it belongs to the existing portal, works at 375 px,
+and never decides permissions on its own.
+
+**Output:** six components under `src/components/portal/v2/` plus a typed client in
+`src/lib/portal-v2.ts`. The console is reached from a new "Control" sidebar item that only
+internal roles see, and each tab is gated by the permission keys the database returns
+(`availableTabs`), not by a hardcoded role name. Empty, loading and error states exist on every
+panel; errors carry operator-language copy mapped from SQLSTATE rather than raw Postgres text.
+
+**Design decisions:** the U-occupancy grid treats `u_position` as the top of a device (a 2U unit
+at U32 also consumes U31) — that convention is asserted in a test so the rack view and the
+future capacity maths cannot drift apart. Finance cells disappear entirely when
+`finance.margins` is absent, rather than rendering zeros.
+
+## Agent 09 — QA / release engineer
+
+**Brief:** prove it, then get it deployable.
+
+| Check | Command | Result |
+| --- | --- | --- |
+| Types | `npx tsc --noEmit` | clean |
+| Tests | `npx vitest run` | 100/100 |
+| Build | `npm run build` | compiled successfully |
+| Environment | `vercel env` | `NEXT_PUBLIC_SUPABASE_ANON_KEY` added for preview + development (it already existed for production) |
+
+**Blocking defect found during QA:** `next build` failed at page-data collection with
+`NETLIFY_DB_URL environment variable is not set` — `db/index.ts` constructed the Drizzle client
+at import time, so *any* environment without that variable could not build, including preview
+deployments. Replaced with a lazily-constructed proxy: importing the module no longer needs a
+database, and the first query still fails loudly with the original message.
+
+**Not covered:** automated browser runs (Playwright) against the new console, and the
+375 px screenshots. Both need a seeded session against the live project and are the first item
+on the Release 3 checklist.
