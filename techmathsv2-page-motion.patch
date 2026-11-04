@@ -1,0 +1,1069 @@
+diff --git a/src/app/about/page.tsx b/src/app/about/page.tsx
+index d027f29..94bcde2 100644
+--- a/src/app/about/page.tsx
++++ b/src/app/about/page.tsx
+@@ -1,4 +1,5 @@
+ import type { Metadata } from "next";
++import { PageScene } from "@/components/page-scene";
+ import { FaqList } from "@/components/faq-list";
+ import { IconGlobe, IconPin, IconShield } from "@/components/icons";
+ import { Reveal } from "@/components/motion";
+@@ -46,7 +47,8 @@ export default function AboutPage() {
+ 
+       <section className="relative overflow-hidden border-b border-[color:var(--tm-line)]">
+         <div className="grid-field grid-fade pointer-events-none absolute inset-0 opacity-50" aria-hidden="true" />
+-        <div className="shell relative py-20 sm:py-24">
++        <PageScene variant="about" />
++        <div className="shell relative z-10 py-20 sm:py-24">
+           <Reveal>
+             <div className="flex flex-wrap items-center gap-2.5">
+               <Pill tone="accent">
+diff --git a/src/app/careers/page.tsx b/src/app/careers/page.tsx
+index 8531db8..e0f253e 100644
+--- a/src/app/careers/page.tsx
++++ b/src/app/careers/page.tsx
+@@ -1,4 +1,5 @@
+ import type { Metadata } from "next";
++import { PageScene } from "@/components/page-scene";
+ import { IconArrow, IconCheck } from "@/components/icons";
+ import { Reveal } from "@/components/motion";
+ import { Btn, Pill, SectionHead } from "@/components/ui";
+@@ -28,7 +29,8 @@ export default function CareersPage() {
+       {jsonLd(breadcrumbLd([{ name: "Home", path: "/" }, { name: "Careers", path: "/careers" }]))}
+       <section className="relative overflow-hidden border-b border-[color:var(--tm-line)]">
+         <div className="grid-field grid-fade pointer-events-none absolute inset-0 opacity-50" aria-hidden="true" />
+-        <div className="shell relative py-20 sm:py-24">
++        <PageScene variant="careers" />
++        <div className="shell relative z-10 py-20 sm:py-24">
+           <Reveal><Pill tone="accent">Careers · Lisbon and field delivery</Pill></Reveal>
+           <h1 className="mt-8 max-w-4xl text-[clamp(2.2rem,5.6vw,4rem)]">Build the work behind the infrastructure.</h1>
+           <Reveal delay={120}>
+diff --git a/src/app/contact/page.tsx b/src/app/contact/page.tsx
+index 2158eed..9d0b9a8 100644
+--- a/src/app/contact/page.tsx
++++ b/src/app/contact/page.tsx
+@@ -1,4 +1,5 @@
+ import type { Metadata } from "next";
++import { PageScene } from "@/components/page-scene";
+ import { QuoteForm } from "@/components/quote-form";
+ import { IconClock, IconMail, IconPhone, IconPin, IconShield, IconWhatsapp } from "@/components/icons";
+ import { Reveal } from "@/components/motion";
+@@ -80,7 +81,8 @@ export default async function ContactPage({
+ 
+       <section className="relative overflow-hidden border-b border-[color:var(--tm-line)]">
+         <div className="grid-field grid-fade pointer-events-none absolute inset-0 opacity-50" aria-hidden="true" />
+-        <div className="shell relative py-16 sm:py-20">
++        <PageScene variant="contact" />
++        <div className="shell relative z-10 py-16 sm:py-20">
+           <Reveal>
+             <div className="flex flex-wrap items-center gap-2.5">
+               <Pill tone="accent">
+diff --git a/src/app/coverage/[country]/page.tsx b/src/app/coverage/[country]/page.tsx
+index 7372146..c75a515 100644
+--- a/src/app/coverage/[country]/page.tsx
++++ b/src/app/coverage/[country]/page.tsx
+@@ -1,4 +1,5 @@
+ import type { Metadata } from "next";
++import { PageScene } from "@/components/page-scene";
+ import Link from "next/link";
+ import { notFound } from "next/navigation";
+ import { FaqList } from "@/components/faq-list";
+@@ -56,7 +57,8 @@ export default async function CountryPage({ params }: { params: Promise<Params>
+ 
+       <section className="relative overflow-hidden border-b border-[color:var(--tm-line)]">
+         <div className="grid-field grid-fade pointer-events-none absolute inset-0 opacity-50" aria-hidden="true" />
+-        <div className="shell relative py-20 sm:py-24">
++        <PageScene variant="country" context={profile.name} />
++        <div className="shell relative z-10 py-20 sm:py-24">
+           <nav aria-label="Breadcrumb" className="mb-8 flex flex-wrap gap-2 font-mono text-[0.65rem] uppercase tracking-[0.14em] text-mute">
+             <Link href="/coverage" className="hover:text-accent">Coverage</Link>
+             <span aria-hidden="true">/</span>
+diff --git a/src/app/coverage/page.tsx b/src/app/coverage/page.tsx
+index 16bcf28..a82011f 100644
+--- a/src/app/coverage/page.tsx
++++ b/src/app/coverage/page.tsx
+@@ -1,4 +1,5 @@
+ import type { Metadata } from "next";
++import { PageScene } from "@/components/page-scene";
+ import Link from "next/link";
+ import { CoverageMap } from "@/components/coverage-map";
+ import { IconArrow, IconClock, IconPin } from "@/components/icons";
+@@ -39,7 +40,8 @@ export default function CoveragePage() {
+ 
+       <section className="relative overflow-hidden border-b border-[color:var(--tm-line)]">
+         <div className="grid-field grid-fade pointer-events-none absolute inset-0 opacity-50" aria-hidden="true" />
+-        <div className="shell relative py-20 sm:py-24">
++        <PageScene variant="coverage" />
++        <div className="shell relative z-10 py-20 sm:py-24">
+           <Pill tone="accent">Lisbon HQ · {countries.length} countries covered</Pill>
+           <h1 className="mt-8 max-w-4xl text-[clamp(2.2rem,5.6vw,4rem)]">
+             On the ground,
+diff --git a/src/app/globals.css b/src/app/globals.css
+index f40d39d..6e0f0fb 100644
+--- a/src/app/globals.css
++++ b/src/app/globals.css
+@@ -369,6 +369,213 @@
+   line-height: 1.55;
+ }
+ 
++/* Page-specific technical motion scenes. These styles are opt-in and are not used on the homepage. */
++@keyframes tm-page-enter {
++  from { opacity: 0; filter: blur(2px); }
++  to { opacity: var(--tm-page-scene-opacity, 0.82); filter: blur(0); }
++}
++@keyframes tm-page-trace {
++  to { stroke-dashoffset: 0; }
++}
++@keyframes tm-page-beacon {
++  0%, 100% { opacity: 0.9; transform: scale(1); }
++  50% { opacity: 0.42; transform: scale(0.76); }
++}
++@keyframes tm-page-spin {
++  to { transform: rotate(360deg); }
++}
++@keyframes tm-page-lift {
++  0%, 100% { transform: translateY(0); }
++  50% { transform: translateY(-3px); }
++}
++@keyframes tm-page-sweep {
++  0%, 25% { transform: translateX(-130%); opacity: 0; }
++  40% { opacity: 0.65; }
++  65%, 100% { transform: translateX(530%); opacity: 0; }
++}
++
++.tm-page-scene {
++  position: absolute;
++  z-index: 0;
++  top: 52%;
++  right: clamp(1.25rem, 5vw, 5.5rem);
++  width: min(35vw, 430px);
++  transform: translateY(-50%);
++  pointer-events: none;
++  --tm-page-scene-opacity: 0.82;
++  opacity: var(--tm-page-scene-opacity);
++  animation: tm-page-enter 900ms var(--ease-out-expo) both;
++}
++.tm-page-scene__frame {
++  position: relative;
++  overflow: hidden;
++  border: 1px solid color-mix(in srgb, var(--tm-accent) 24%, var(--tm-line));
++  border-radius: 20px;
++  background:
++    radial-gradient(ellipse at 50% 50%, color-mix(in srgb, var(--tm-accent) 8%, transparent), transparent 68%),
++    linear-gradient(145deg, color-mix(in srgb, var(--tm-panel) 96%, transparent), color-mix(in srgb, var(--tm-ink-2) 92%, transparent));
++  box-shadow: 0 22px 90px -48px var(--tm-glow), inset 0 1px 0 color-mix(in srgb, white 5%, transparent);
++  isolation: isolate;
++}
++.tm-page-scene__frame::after {
++  position: absolute;
++  z-index: 2;
++  inset: -10% auto -10% 0;
++  width: 18%;
++  content: "";
++  background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--tm-accent) 9%, transparent), transparent);
++  transform: translateX(-130%);
++  animation: tm-page-sweep 11s ease-in-out 1.5s infinite;
++}
++.tm-page-scene__header,
++.tm-page-scene__footer {
++  position: relative;
++  z-index: 3;
++  display: flex;
++  align-items: center;
++  justify-content: space-between;
++  gap: 0.75rem;
++  padding-inline: 1rem;
++  color: var(--tm-mute);
++  font: 500 0.55rem/1.2 var(--tm-font-mono);
++  letter-spacing: 0.15em;
++  text-transform: uppercase;
++}
++.tm-page-scene__header { padding-top: 0.9rem; }
++.tm-page-scene__footer {
++  min-height: 2.25rem;
++  padding-bottom: 0.85rem;
++  letter-spacing: 0.08em;
++  text-transform: none;
++}
++.tm-page-scene__status { display: inline-flex; align-items: center; gap: 0.4rem; white-space: nowrap; }
++.tm-page-scene__status i {
++  width: 5px;
++  height: 5px;
++  border-radius: 50%;
++  background: var(--tm-accent);
++  box-shadow: 0 0 10px var(--tm-glow);
++  animation: tm-page-beacon 2.6s ease-in-out infinite;
++}
++.tm-page-scene__svg { position: relative; z-index: 1; display: block; width: 100%; height: auto; }
++.tm-page-scene__hairline { stroke: var(--tm-line); stroke-width: 1; }
++.tm-page-scene__line {
++  fill: none;
++  stroke: var(--tm-mist);
++  stroke-opacity: 0.27;
++  stroke-width: 1.25;
++  stroke-linecap: round;
++  stroke-linejoin: round;
++}
++.tm-page-scene__line--accent {
++  stroke: var(--tm-accent);
++  stroke-opacity: 0.9;
++  filter: drop-shadow(0 0 4px var(--tm-glow));
++}
++.tm-page-scene__line--draw {
++  stroke: var(--tm-accent);
++  stroke-opacity: 0.76;
++  stroke-dasharray: 520;
++  stroke-dashoffset: 520;
++  animation: tm-page-trace 2.4s var(--ease-out-expo) 160ms forwards;
++}
++.tm-page-scene__node {
++  fill: var(--tm-accent);
++  stroke: var(--tm-ink);
++  stroke-width: 1.5;
++  transform-box: fill-box;
++  transform-origin: center;
++  animation: tm-page-beacon 3.2s ease-in-out infinite;
++}
++.tm-page-scene__node--soft { fill: var(--tm-mist); opacity: 0.68; }
++.tm-page-scene__core {
++  fill: color-mix(in srgb, var(--tm-accent) 13%, var(--tm-panel));
++  stroke: color-mix(in srgb, var(--tm-accent) 70%, transparent);
++  stroke-width: 1.2;
++}
++.tm-page-scene__chip,
++.tm-page-scene__bay {
++  fill: color-mix(in srgb, var(--tm-panel-2) 76%, transparent);
++  stroke: var(--tm-line-strong);
++  stroke-width: 1;
++}
++.tm-page-scene__bay--active {
++  fill: color-mix(in srgb, var(--tm-accent) 13%, var(--tm-panel));
++  stroke: color-mix(in srgb, var(--tm-accent) 65%, transparent);
++}
++.tm-page-scene__bay--empty {
++  fill: color-mix(in srgb, var(--tm-accent) 7%, var(--tm-panel));
++  stroke: var(--tm-accent);
++  stroke-dasharray: 3 4;
++}
++.tm-page-scene__track { fill: var(--tm-line-strong); }
++.tm-page-scene__progress { fill: var(--tm-accent); filter: drop-shadow(0 0 4px var(--tm-glow)); }
++.tm-page-scene__map {
++  fill: color-mix(in srgb, var(--tm-accent) 7%, var(--tm-panel));
++  stroke: color-mix(in srgb, var(--tm-accent) 38%, var(--tm-line-strong));
++  stroke-width: 1;
++}
++.tm-page-scene__orbit {
++  fill: none;
++  stroke: color-mix(in srgb, var(--tm-accent) 48%, transparent);
++  stroke-width: 1;
++  stroke-dasharray: 2 7;
++  transform-box: fill-box;
++  transform-origin: center;
++  animation: tm-page-spin 38s linear infinite;
++}
++.tm-page-scene__halo {
++  fill: color-mix(in srgb, var(--tm-accent) 11%, transparent);
++  stroke: color-mix(in srgb, var(--tm-accent) 34%, transparent);
++  stroke-width: 1;
++  transform-box: fill-box;
++  transform-origin: center;
++  animation: tm-page-beacon 3.4s ease-in-out infinite;
++}
++.tm-page-scene__lift { transform-box: fill-box; transform-origin: center; animation: tm-page-lift 4.6s ease-in-out infinite; }
++.tm-page-scene__svg-label {
++  fill: var(--tm-accent);
++  font: 600 7px/1 var(--tm-font-mono);
++  letter-spacing: 0.7px;
++}
++.tm-page-scene__micro {
++  fill: var(--tm-mute);
++  font: 500 6px/1 var(--tm-font-mono);
++  letter-spacing: 0.7px;
++}
++@media (max-width: 1023px) {
++  .tm-page-scene { top: 35%; right: 3%; width: min(34vw, 320px); --tm-page-scene-opacity: 0.32; opacity: var(--tm-page-scene-opacity); }
++}
++@media (max-width: 639px) {
++  .tm-page-scene { top: 0.75rem; right: -1.5rem; width: 155px; transform: none; --tm-page-scene-opacity: 0.19; opacity: var(--tm-page-scene-opacity); }
++  .tm-page-scene__frame { border-radius: 14px; }
++  .tm-page-scene__header,
++  .tm-page-scene__footer { padding-inline: 0.6rem; font-size: 0.42rem; }
++  .tm-page-scene__footer { min-height: 1.7rem; }
++}
++.tm-page-scene--service-detail {
++  top: 72%;
++  width: min(28vw, 360px);
++  --tm-page-scene-opacity: 0.56;
++  opacity: var(--tm-page-scene-opacity);
++}
++@media (max-width: 1023px) {
++  .tm-page-scene--service-detail { top: 57%; width: min(31vw, 300px); --tm-page-scene-opacity: 0.27; opacity: var(--tm-page-scene-opacity); }
++}
++@media (max-width: 639px) {
++  .tm-page-scene--service-detail { top: 0.75rem; right: -1.5rem; width: 125px; --tm-page-scene-opacity: 0.13; opacity: var(--tm-page-scene-opacity); }
++}
++.tm-page-scene--portal {
++  top: 50%;
++  right: max(4vw, 2rem);
++  width: min(30vw, 360px);
++  --tm-page-scene-opacity: 0.28;
++  opacity: var(--tm-page-scene-opacity);
++}
++@media (max-width: 900px) {
++  .tm-page-scene--portal { display: none; }
++}
++
+ /* Reduced motion + manual motion-off switch ------------------------------ */
+ @media (prefers-reduced-motion: reduce) {
+   html { scroll-behavior: auto; }
+diff --git a/src/app/how-we-work/page.tsx b/src/app/how-we-work/page.tsx
+index c20f7b3..4074502 100644
+--- a/src/app/how-we-work/page.tsx
++++ b/src/app/how-we-work/page.tsx
+@@ -1,4 +1,5 @@
+ import type { Metadata } from "next";
++import { PageScene } from "@/components/page-scene";
+ import { FaqList } from "@/components/faq-list";
+ import { IconDoc, IconShield } from "@/components/icons";
+ import { Reveal } from "@/components/motion";
+@@ -31,7 +32,8 @@ export default function HowWeWorkPage() {
+ 
+       <section className="relative overflow-hidden border-b border-[color:var(--tm-line)]">
+         <div className="grid-field grid-fade pointer-events-none absolute inset-0 opacity-50" aria-hidden="true" />
+-        <div className="shell relative py-20 sm:py-24">
++        <PageScene variant="process" />
++        <div className="shell relative z-10 py-20 sm:py-24">
+           <Reveal>
+             <Pill tone="accent">Eight stages · one quality gate each</Pill>
+           </Reveal>
+diff --git a/src/app/industries/page.tsx b/src/app/industries/page.tsx
+index 4b0adc3..c4da08e 100644
+--- a/src/app/industries/page.tsx
++++ b/src/app/industries/page.tsx
+@@ -1,4 +1,5 @@
+ import type { Metadata } from "next";
++import { PageScene } from "@/components/page-scene";
+ import Link from "next/link";
+ import { IconArrow, ServiceIcon } from "@/components/icons";
+ import { Reveal } from "@/components/motion";
+@@ -35,7 +36,8 @@ export default function IndustriesPage() {
+ 
+       <section className="relative overflow-hidden border-b border-[color:var(--tm-line)]">
+         <div className="grid-field grid-fade pointer-events-none absolute inset-0 opacity-50" aria-hidden="true" />
+-        <div className="shell relative py-20 sm:py-24">
++        <PageScene variant="industries" />
++        <div className="shell relative z-10 py-20 sm:py-24">
+           <Reveal>
+             <Pill tone="accent">Five sectors · one delivery standard</Pill>
+           </Reveal>
+diff --git a/src/app/insights/[slug]/page.tsx b/src/app/insights/[slug]/page.tsx
+index 9a1967a..e2026e1 100644
+--- a/src/app/insights/[slug]/page.tsx
++++ b/src/app/insights/[slug]/page.tsx
+@@ -1,4 +1,5 @@
+ import type { Metadata } from "next";
++import { PageScene } from "@/components/page-scene";
+ import Link from "next/link";
+ import { notFound } from "next/navigation";
+ import { Markdown } from "@/components/markdown";
+@@ -74,7 +75,8 @@ export default async function InsightPage({ params }: { params: Promise<{ slug:
+ 
+       <section className="relative overflow-hidden border-b border-[color:var(--tm-line)]">
+         <div className="grid-field grid-fade pointer-events-none absolute inset-0 opacity-50" aria-hidden="true" />
+-        <div className="shell relative py-16 sm:py-20">
++        <PageScene variant="article" />
++        <div className="shell relative z-10 py-16 sm:py-20">
+           <nav aria-label="Breadcrumb" className="mb-8">
+             <ol className="flex flex-wrap items-center gap-2 font-mono text-[0.62rem] uppercase tracking-[0.14em] text-mute">
+               <li>
+diff --git a/src/app/insights/page.tsx b/src/app/insights/page.tsx
+index e99c7c3..c5cb82d 100644
+--- a/src/app/insights/page.tsx
++++ b/src/app/insights/page.tsx
+@@ -1,4 +1,5 @@
+ import type { Metadata } from "next";
++import { PageScene } from "@/components/page-scene";
+ import { InsightsExplorer } from "@/components/insights-explorer";
+ import { Reveal } from "@/components/motion";
+ import { Btn, Pill, SectionHead } from "@/components/ui";
+@@ -36,7 +37,8 @@ export default function InsightsPage() {
+ 
+       <section className="relative overflow-hidden border-b border-[color:var(--tm-line)]">
+         <div className="grid-field grid-fade pointer-events-none absolute inset-0 opacity-50" aria-hidden="true" />
+-        <div className="shell relative py-20 sm:py-24">
++        <PageScene variant="insights" />
++        <div className="shell relative z-10 py-20 sm:py-24">
+           <Reveal>
+             <div className="flex flex-wrap items-center gap-2.5">
+               <Pill tone="accent">{insights.length} published</Pill>
+diff --git a/src/app/not-found.tsx b/src/app/not-found.tsx
+index 0110bc7..34825cf 100644
+--- a/src/app/not-found.tsx
++++ b/src/app/not-found.tsx
+@@ -1,4 +1,5 @@
+ import Link from "next/link";
++import { PageScene } from "@/components/page-scene";
+ import { Btn } from "@/components/ui";
+ import { IconArrow } from "@/components/icons";
+ 
+@@ -7,11 +8,12 @@ export default function NotFound() {
+   return (
+     <section className="relative flex min-h-[70vh] items-center overflow-hidden">
+       <div className="grid-field grid-fade pointer-events-none absolute inset-0 opacity-50" aria-hidden="true" />
++        <PageScene variant="not-found" />
+       <div
+         className="pointer-events-none absolute left-1/2 top-1/3 h-72 w-72 -translate-x-1/2 rounded-full bg-[radial-gradient(circle,var(--tm-glow),transparent_65%)] opacity-20"
+         aria-hidden="true"
+       />
+-      <div className="shell relative py-20">
++      <div className="shell relative z-10 py-20">
+         <p className="font-mono text-[0.66rem] uppercase tracking-[0.24em] text-accent">Error 404</p>
+         <h1 className="mt-6 max-w-3xl text-[clamp(2.4rem,7vw,5rem)] leading-[0.98]">
+           This rack position
+diff --git a/src/app/projects/[slug]/page.tsx b/src/app/projects/[slug]/page.tsx
+index c617eb4..f4ab83f 100644
+--- a/src/app/projects/[slug]/page.tsx
++++ b/src/app/projects/[slug]/page.tsx
+@@ -1,4 +1,5 @@
+ import type { Metadata } from "next";
++import { PageScene } from "@/components/page-scene";
+ import Link from "next/link";
+ import { notFound } from "next/navigation";
+ import { IconArrow, IconCheck, IconClock, IconPin, IconUsers, ServiceIcon } from "@/components/icons";
+@@ -54,7 +55,8 @@ export default async function ProjectPage({ params }: { params: Promise<{ slug:
+ 
+       <section className="relative overflow-hidden border-b border-[color:var(--tm-line)]">
+         <div className="grid-field grid-fade pointer-events-none absolute inset-0 opacity-50" aria-hidden="true" />
+-        <div className="shell relative py-20 sm:py-24">
++        <PageScene variant="project" />
++        <div className="shell relative z-10 py-20 sm:py-24">
+           <nav aria-label="Breadcrumb" className="mb-8">
+             <ol className="flex flex-wrap items-center gap-2 font-mono text-[0.62rem] uppercase tracking-[0.14em] text-mute">
+               <li>
+diff --git a/src/app/projects/page.tsx b/src/app/projects/page.tsx
+index ee5b067..8adaf3f 100644
+--- a/src/app/projects/page.tsx
++++ b/src/app/projects/page.tsx
+@@ -1,4 +1,5 @@
+ import type { Metadata } from "next";
++import { PageScene } from "@/components/page-scene";
+ import { ProjectsExplorer } from "@/components/projects-explorer";
+ import { Reveal } from "@/components/motion";
+ import { Btn, Pill, SectionHead } from "@/components/ui";
+@@ -28,7 +29,8 @@ export default function ProjectsPage() {
+ 
+       <section className="relative overflow-hidden border-b border-[color:var(--tm-line)]">
+         <div className="grid-field grid-fade pointer-events-none absolute inset-0 opacity-50" aria-hidden="true" />
+-        <div className="shell relative py-20 sm:py-24">
++        <PageScene variant="projects" />
++        <div className="shell relative z-10 py-20 sm:py-24">
+           <Reveal>
+             <div className="flex flex-wrap items-center gap-2.5">
+               <Pill tone="accent">{projects.length} published cases</Pill>
+diff --git a/src/app/services/[slug]/[country]/page.tsx b/src/app/services/[slug]/[country]/page.tsx
+index 974b901..98bf081 100644
+--- a/src/app/services/[slug]/[country]/page.tsx
++++ b/src/app/services/[slug]/[country]/page.tsx
+@@ -1,4 +1,5 @@
+ import type { Metadata } from "next";
++import { PageScene } from "@/components/page-scene";
+ import Link from "next/link";
+ import { notFound } from "next/navigation";
+ import { FaqList } from "@/components/faq-list";
+@@ -72,11 +73,12 @@ export default async function RegionalServicePage({ params }: { params: Promise<
+       {/* Hero */}
+       <section className="relative overflow-hidden border-b border-[color:var(--tm-line)]">
+         <div className="grid-field grid-fade pointer-events-none absolute inset-0 opacity-50" aria-hidden="true" />
++        <PageScene variant={p.service.slug} context={p.country.name} className="tm-page-scene--service-detail" />
+         <div
+           className="pointer-events-none absolute -left-24 top-0 h-72 w-72 rounded-full bg-[radial-gradient(circle,var(--tm-glow),transparent_65%)] opacity-20"
+           aria-hidden="true"
+         />
+-        <div className="shell relative py-20 sm:py-24">
++        <div className="shell relative z-10 py-20 sm:py-24">
+           <nav aria-label="Breadcrumb" className="mb-8">
+             <ol className="flex flex-wrap items-center gap-2 font-mono text-[0.62rem] uppercase tracking-[0.14em] text-mute">
+               <li>
+diff --git a/src/app/services/[slug]/page.tsx b/src/app/services/[slug]/page.tsx
+index c02da0b..0f58f77 100644
+--- a/src/app/services/[slug]/page.tsx
++++ b/src/app/services/[slug]/page.tsx
+@@ -1,4 +1,5 @@
+ import type { Metadata } from "next";
++import { PageScene } from "@/components/page-scene";
+ import Link from "next/link";
+ import { notFound } from "next/navigation";
+ import { FaqList } from "@/components/faq-list";
+@@ -58,11 +59,12 @@ export default async function ServicePage({ params }: { params: Promise<{ slug:
+       {/* Hero */}
+       <section className="relative overflow-hidden border-b border-[color:var(--tm-line)]">
+         <div className="grid-field grid-fade pointer-events-none absolute inset-0 opacity-50" aria-hidden="true" />
++        <PageScene variant={service.slug} className="tm-page-scene--service-detail" />
+         <div
+           className="pointer-events-none absolute -right-24 top-0 h-72 w-72 rounded-full bg-[radial-gradient(circle,var(--tm-glow),transparent_65%)] opacity-20"
+           aria-hidden="true"
+         />
+-        <div className="shell relative py-20 sm:py-24">
++        <div className="shell relative z-10 py-20 sm:py-24">
+           <nav aria-label="Breadcrumb" className="mb-8">
+             <ol className="flex flex-wrap items-center gap-2 font-mono text-[0.62rem] uppercase tracking-[0.14em] text-mute">
+               <li>
+diff --git a/src/app/services/page.tsx b/src/app/services/page.tsx
+index 1345bf8..e308e3d 100644
+--- a/src/app/services/page.tsx
++++ b/src/app/services/page.tsx
+@@ -1,4 +1,5 @@
+ import type { Metadata } from "next";
++import { PageScene } from "@/components/page-scene";
+ import { ServicesExplorer } from "@/components/services-explorer";
+ import { Reveal } from "@/components/motion";
+ import { Btn, SectionHead } from "@/components/ui";
+@@ -40,7 +41,8 @@ export default function ServicesPage() {
+ 
+       <section className="relative overflow-hidden border-b border-[color:var(--tm-line)]">
+         <div className="grid-field grid-fade pointer-events-none absolute inset-0 opacity-50" aria-hidden="true" />
+-        <div className="shell relative py-20 sm:py-24">
++        <PageScene variant="services" />
++        <div className="shell relative z-10 py-20 sm:py-24">
+           <SectionHead
+             level="h1"
+             eyebrow="Service catalogue"
+diff --git a/src/components/legal-page.tsx b/src/components/legal-page.tsx
+index cb1fa08..5861641 100644
+--- a/src/components/legal-page.tsx
++++ b/src/components/legal-page.tsx
+@@ -1,4 +1,5 @@
+ import type { ReactNode } from "react";
++import { PageScene } from "@/components/page-scene";
+ import Link from "next/link";
+ import { COMPANY } from "@/lib/content/site";
+ import { Pill } from "./ui";
+@@ -23,7 +24,8 @@ export function LegalPage({
+     <>
+       <section className="relative overflow-hidden border-b border-[color:var(--tm-line)]">
+         <div className="grid-field grid-fade pointer-events-none absolute inset-0 opacity-40" aria-hidden="true" />
+-        <div className="shell relative py-16 sm:py-20">
++        <PageScene variant="policy" context={title} />
++        <div className="shell relative z-10 py-16 sm:py-20">
+           <nav aria-label="Breadcrumb" className="mb-7">
+             <ol className="flex items-center gap-2 font-mono text-[0.62rem] uppercase tracking-[0.14em] text-mute">
+               <li>
+diff --git a/src/components/operations-portal.tsx b/src/components/operations-portal.tsx
+index e3c9d1e..b9b293c 100644
+--- a/src/components/operations-portal.tsx
++++ b/src/components/operations-portal.tsx
+@@ -29,6 +29,7 @@ import {
+   X,
+ } from "lucide-react";
+ import { isSupabaseConfigured, supabase } from "@/lib/supabase-browser";
++import { PageScene } from "@/components/page-scene";
+ import { SERVICES } from "@/lib/content/services";
+ import { TicketChat } from "@/components/portal/ticket-chat";
+ import { LiveMapView } from "@/components/portal/live-map-view";
+@@ -178,6 +179,7 @@ function LoginScreen({ onMessage }: { onMessage: (m: string) => void }) {
+   return (
+     <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-[#05070D] px-4 py-10 text-[#E8EEF9]">
+       <div className="absolute inset-0 bg-grid opacity-40" />
++      <PageScene variant="portal" />
+       <div className="pointer-events-none absolute -left-40 top-20 h-96 w-96 rounded-full bg-[#38E1FF]/[0.06] blur-[110px]" />
+       <div className="pointer-events-none absolute -right-40 bottom-0 h-96 w-96 rounded-full bg-[#7C9BFF]/[0.045] blur-[110px]" />
+       <div className="relative w-full max-w-[420px]">
+@@ -513,8 +515,9 @@ export function OperationsPortal() {
+ 
+   if (!isSupabaseConfigured || !supabase) {
+     return (
+-      <div className="flex min-h-screen items-center justify-center bg-[#05070D] px-5 text-[#E8EEF9]">
+-        <div className="max-w-lg rounded-2xl border border-white/10 bg-[#0B1018] p-7">
++      <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-[#05070D] px-5 text-[#E8EEF9]">
++        <PageScene variant="portal" />
++        <div className="relative z-10 max-w-lg rounded-2xl border border-white/10 bg-[#0B1018] p-7">
+           <BrandMark />
+           <div className="mt-7 flex items-center gap-2 text-[#FFB84D]">
+             <AlertCircle size={16} /> Supabase setup required
+diff --git a/src/components/page-scene.tsx b/src/components/page-scene.tsx
+new file mode 100644
+index 0000000..66a0773
+--- /dev/null
++++ b/src/components/page-scene.tsx
+@@ -0,0 +1,481 @@
++import type { ReactNode } from "react";
++
++type SceneKind =
++  | "services"
++  | "rack"
++  | "cabling"
++  | "server"
++  | "software"
++  | "network"
++  | "testing"
++  | "remote"
++  | "migration"
++  | "maintenance"
++  | "about"
++  | "careers"
++  | "contact"
++  | "coverage"
++  | "country"
++  | "process"
++  | "industries"
++  | "insights"
++  | "article"
++  | "projects"
++  | "project"
++  | "policy"
++  | "portal"
++  | "not-found";
++
++const PAGE_SCENES: Record<string, SceneKind> = {
++  services: "services",
++  about: "about",
++  careers: "careers",
++  contact: "contact",
++  coverage: "coverage",
++  country: "country",
++  process: "process",
++  industries: "industries",
++  insights: "insights",
++  article: "article",
++  projects: "projects",
++  project: "project",
++  policy: "policy",
++  portal: "portal",
++  "not-found": "not-found",
++};
++
++const SERVICE_SCENES: Record<string, SceneKind> = {
++  "rack-and-stack": "rack",
++  "structured-cabling": "cabling",
++  "server-installation": "server",
++  "os-application-installation": "software",
++  "network-connection": "network",
++  "commissioning-testing": "testing",
++  "remote-smart-hands": "remote",
++  "decommissioning-migration": "migration",
++  "maintenance-field-support": "maintenance",
++};
++
++const SCENE_COPY: Record<SceneKind, { code: string; caption: string }> = {
++  services: { code: "SYS / 09", caption: "Nine services · one delivery standard" },
++  rack: { code: "BUILD / 01", caption: "Rack elevations · verified placement" },
++  cabling: { code: "BUILD / 02", caption: "Pathways · labels · test results" },
++  server: { code: "INSTALL / 03", caption: "Hardware · baseline · handover" },
++  software: { code: "INSTALL / 04", caption: "Known-good image · controlled change" },
++  network: { code: "INSTALL / 05", caption: "Links · routes · end-to-end checks" },
++  testing: { code: "VALIDATE / 06", caption: "Evidence before acceptance" },
++  remote: { code: "OPERATE / 07", caption: "Remote request · local hands" },
++  migration: { code: "OPERATE / 08", caption: "Planned move · reconciled inventory" },
++  maintenance: { code: "OPERATE / 09", caption: "Repeatable care · clear records" },
++  about: { code: "COMPANY / TM", caption: "People · proof · accountability" },
++  careers: { code: "CAREERS / EU", caption: "Skill grows into responsibility" },
++  contact: { code: "DESK / 24H", caption: "A clear brief starts a clean delivery" },
++  coverage: { code: "NETWORK / EU", caption: "Regional reach · local execution" },
++  country: { code: "SITE / LOCAL", caption: "Local context · consistent method" },
++  process: { code: "METHOD / 08", caption: "Plan · deliver · prove · hand over" },
++  industries: { code: "SECTORS / 04", caption: "Different workloads · same discipline" },
++  insights: { code: "FIELD NOTES", caption: "Practical knowledge from live sites" },
++  article: { code: "TECHNICAL NOTE", caption: "Details that make work auditable" },
++  projects: { code: "DELIVERY / LOG", caption: "Scope · milestones · measured result" },
++  project: { code: "CASE / FILE", caption: "Plan lines become verified outcomes" },
++  policy: { code: "DOCUMENT / CONTROL", caption: "Current version · clear ownership" },
++  portal: { code: "SECURE / EU", caption: "Authenticated operations workspace" },
++  "not-found": { code: "PORT / UNMAPPED", caption: "No route found · service remains online" },
++};
++
++function SceneDrawing({ kind }: { kind: SceneKind }) {
++  const line = "tm-page-scene__line";
++  const accent = "tm-page-scene__line tm-page-scene__line--accent";
++  const draw = "tm-page-scene__line tm-page-scene__line--draw";
++  const node = "tm-page-scene__node";
++  const softNode = "tm-page-scene__node tm-page-scene__node--soft";
++
++  let art: ReactNode;
++  switch (kind) {
++    case "services":
++      art = (
++        <g>
++          <circle cx="180" cy="108" r="72" className="tm-page-scene__orbit" />
++          <circle cx="180" cy="108" r="45" className={line} />
++          <path d="M180 36V78M242 72 211 91M242 144l-31-18M180 180v-42M118 144l31-18M118 72l31 19" className={draw} />
++          <circle cx="180" cy="108" r="24" className="tm-page-scene__core" />
++          <text x="180" y="112" textAnchor="middle" className="tm-page-scene__svg-label">TM</text>
++          {[[180, 36], [242, 72], [242, 144], [180, 180], [118, 144], [118, 72]].map(([x, y], i) => (
++            <circle key={i} cx={x} cy={y} r="5" className={i % 2 ? softNode : node} style={{ animationDelay: `${i * 160}ms` }} />
++          ))}
++          <path d="M52 108h32m192 0h32M180 17v12m0 158v12" className={accent} />
++        </g>
++      );
++      break;
++    case "rack":
++      art = (
++        <g>
++          {[70, 150, 230].map((x, i) => (
++            <g key={x} className="tm-page-scene__lift" style={{ animationDelay: `${i * 180}ms` }}>
++              <rect x={x} y="49" width="56" height="116" rx="5" className={line} />
++              {[0, 1, 2, 3].map((row) => (
++                <g key={row}>
++                  <rect x={x + 8} y={62 + row * 23} width="40" height="16" rx="2" className={row === 2 && i === 1 ? "tm-page-scene__bay tm-page-scene__bay--active" : "tm-page-scene__bay"} />
++                  <circle cx={x + 43} cy={70 + row * 23} r="1.7" className={node} />
++                </g>
++              ))}
++            </g>
++          ))}
++          <path d="M42 177h276M42 42h276" className={line} />
++          <path d="M180 31v15m-8-7.5h16" className={accent} />
++          <circle cx="180" cy="177" r="4" className={node} />
++        </g>
++      );
++      break;
++    case "cabling":
++      art = (
++        <g>
++          <rect x="28" y="62" width="46" height="88" rx="6" className={line} />
++          <rect x="286" y="62" width="46" height="88" rx="6" className={line} />
++          {[0, 1, 2].map((i) => (
++            <g key={i}>
++              <path d={`M74 ${82 + i * 24}H126Q144 ${82 + i * 24} 144 ${64 + i * 24}H216Q234 ${64 + i * 24} 234 ${82 + i * 24}H286`} className={i === 1 ? accent : draw} style={{ animationDelay: `${i * 240}ms` }} />
++              <circle cx="286" cy={82 + i * 24} r="3" className={node} style={{ animationDelay: `${i * 260}ms` }} />
++            </g>
++          ))}
++          <path d="M51 78v56m258-56v56" className={line} />
++          <circle cx="144" cy="88" r="3" className={softNode} />
++          <circle cx="216" cy="112" r="3" className={softNode} />
++        </g>
++      );
++      break;
++    case "server":
++      art = (
++        <g>
++          <path d="M88 48h184v120H88z" className={line} />
++          {[0, 1, 2].map((row) => (
++            <g key={row} className="tm-page-scene__lift" style={{ animationDelay: `${row * 200}ms` }}>
++              <rect x="102" y={60 + row * 34} width="156" height="26" rx="4" className="tm-page-scene__bay" />
++              <path d={`M116 ${73 + row * 34}h61`} className={line} />
++              <circle cx="241" cy={73 + row * 34} r="3" className={node} />
++            </g>
++          ))}
++          <path d="M66 177h228M180 32v12" className={accent} />
++          <path d="m171 39 9 9 9-9" className={accent} />
++        </g>
++      );
++      break;
++    case "software":
++      art = (
++        <g>
++          <rect x="66" y="42" width="228" height="132" rx="10" className={line} />
++          <path d="M66 68h228" className={line} />
++          <circle cx="82" cy="55" r="2.5" className={node} />
++          <circle cx="92" cy="55" r="2.5" className={softNode} />
++          <text x="108" y="58" className="tm-page-scene__micro">BASELINE / VERIFIED</text>
++          <rect x="86" y="87" width="50" height="50" rx="8" className="tm-page-scene__core" />
++          <path d="M99 112h24m-12-12v24" className={accent} />
++          <path d="M154 93h104m-104 13h79m-79 13h93" className={line} />
++          <rect x="154" y="137" width="104" height="7" rx="3.5" className="tm-page-scene__track" />
++          <rect x="154" y="137" width="72" height="7" rx="3.5" className="tm-page-scene__progress" />
++          <path d="M86 158h172" className={draw} />
++        </g>
++      );
++      break;
++    case "network":
++      art = (
++        <g>
++          <path d="M70 80 145 57l72 31 70-21M70 80l30 78 117-70 68 70M145 57l-45 101m117-70 23 70" className={draw} />
++          <circle cx="70" cy="80" r="8" className={node} />
++          <circle cx="145" cy="57" r="8" className={softNode} />
++          <circle cx="217" cy="88" r="10" className={node} />
++          <circle cx="287" cy="67" r="8" className={softNode} />
++          <circle cx="100" cy="158" r="8" className={softNode} />
++          <circle cx="217" cy="158" r="8" className={node} />
++          <circle cx="285" cy="158" r="8" className={softNode} />
++          <rect x="174" y="105" width="86" height="30" rx="6" className="tm-page-scene__chip" />
++          <text x="217" y="124" textAnchor="middle" className="tm-page-scene__svg-label">LINK OK</text>
++        </g>
++      );
++      break;
++    case "testing":
++      art = (
++        <g>
++          <path d="M44 152h272M44 68h272M44 110h272" className={line} />
++          <path d="M44 110h34l12-22 17 44 18-58 20 73 19-51 17 24h24l15-20 15 10h26" className={accent} />
++          <path d="M56 164v-9m36 9v-9m36 9v-9m36 9v-9m36 9v-9m36 9v-9m36 9v-9" className={line} />
++          <circle cx="282" cy="90" r="19" className="tm-page-scene__halo" />
++          <path d="m273 90 6 6 12-14" className={accent} />
++          <text x="282" y="123" textAnchor="middle" className="tm-page-scene__micro">PASS</text>
++        </g>
++      );
++      break;
++    case "remote":
++      art = (
++        <g>
++          <rect x="52" y="58" width="112" height="102" rx="9" className={line} />
++          <rect x="68" y="75" width="80" height="48" rx="4" className="tm-page-scene__chip" />
++          <path d="M80 91h26m-26 11h44" className={line} />
++          <circle cx="142" cy="138" r="3" className={node} />
++          <path d="M164 108h38m0 0-10-10m10 10-10 10" className={draw} />
++          <rect x="213" y="68" width="94" height="82" rx="8" className={line} />
++          <path d="M230 91h60m-60 14h42m-42 14h52" className={line} />
++          <circle cx="259" cy="163" r="26" className="tm-page-scene__orbit" />
++          <circle cx="259" cy="163" r="5" className={node} />
++        </g>
++      );
++      break;
++    case "migration":
++      art = (
++        <g>
++          {[52, 242].map((x, i) => (
++            <g key={x}>
++              <rect x={x} y="56" width="66" height="112" rx="6" className={line} />
++              {[0, 1, 2].map((r) => <rect key={r} x={x + 10} y={68 + r * 28} width="46" height="19" rx="3" className={r === 1 && i === 1 ? "tm-page-scene__bay tm-page-scene__bay--active" : "tm-page-scene__bay"} />)}
++            </g>
++          ))}
++          <path d="M126 96h102m0 0-12-12m12 12-12 12" className={accent} />
++          <path d="M126 128h102" className={draw} />
++          <circle cx="175" cy="128" r="4" className={node} />
++          <text x="85" y="187" textAnchor="middle" className="tm-page-scene__micro">SOURCE</text>
++          <text x="275" y="187" textAnchor="middle" className="tm-page-scene__micro">TARGET</text>
++        </g>
++      );
++      break;
++    case "maintenance":
++      art = (
++        <g>
++          <circle cx="180" cy="107" r="57" className="tm-page-scene__orbit" />
++          <circle cx="180" cy="107" r="36" className={line} />
++          <path d="M180 71v36l25 16" className={accent} />
++          <circle cx="180" cy="107" r="6" className={node} />
++          <path d="M114 72 91 54m155 18 23-18m-155 98-23 18m155-18 23 18" className={draw} />
++          {[[91, 54], [269, 54], [91, 160], [269, 160]].map(([x, y], i) => <circle key={i} cx={x} cy={y} r="7" className={i % 2 ? softNode : node} />)}
++          <text x="180" y="185" textAnchor="middle" className="tm-page-scene__micro">PREVENT · RECORD · REPEAT</text>
++        </g>
++      );
++      break;
++    case "about":
++      art = (
++        <g>
++          <circle cx="180" cy="108" r="72" className={line} />
++          <circle cx="180" cy="108" r="47" className="tm-page-scene__orbit" />
++          <circle cx="180" cy="108" r="20" className="tm-page-scene__core" />
++          <path d="M180 86v44m-22-22h44" className={accent} />
++          <path d="M180 36v26m62 10-22 13m22 51-22-13m-40 57v-26m-62-18 22-13m-22-51 22 13" className={draw} />
++          {[[180, 36], [242, 72], [242, 144], [180, 180], [118, 144], [118, 72]].map(([x, y], i) => <circle key={i} cx={x} cy={y} r="5" className={i === 2 ? node : softNode} />)}
++        </g>
++      );
++      break;
++    case "careers":
++      art = (
++        <g>
++          <path d="M58 165h48v-23h49v-24h49V94h49V70h48" className={draw} />
++          <path d="M58 178h272" className={line} />
++          {[0, 1, 2, 3, 4].map((i) => <circle key={i} cx={82 + i * 49} cy={165 - i * 23.7} r="5" className={i === 4 ? node : softNode} style={{ animationDelay: `${i * 170}ms` }} />)}
++          <path d="m281 61 19 9-19 9" className={accent} />
++          <rect x="74" y="48" width="92" height="27" rx="5" className="tm-page-scene__chip" />
++          <text x="120" y="65" textAnchor="middle" className="tm-page-scene__svg-label">CRAFT → LEAD</text>
++        </g>
++      );
++      break;
++    case "contact":
++      art = (
++        <g>
++          <rect x="44" y="62" width="116" height="82" rx="10" className={line} />
++          <path d="m56 76 46 33 46-33" className={draw} />
++          <circle cx="65" cy="127" r="3" className={node} />
++          <path d="M160 103h48m0 0-10-10m10 10-10 10" className={accent} />
++          <rect x="209" y="81" width="109" height="69" rx="10" className="tm-page-scene__chip" />
++          <path d="M226 101h74m-74 15h52m-52 15h64" className={line} />
++          <circle cx="267" cy="166" r="5" className={node} />
++          <circle cx="267" cy="166" r="18" className="tm-page-scene__halo" />
++        </g>
++      );
++      break;
++    case "coverage":
++      art = (
++        <g>
++          <path d="M92 49 129 42l22 15 29-4 19 18 26 3 21 24-9 18 17 19-20 27-26-4-22 18-22-13-24 4-13-23-24-9 9-25-13-23 17-17-4-24Z" className="tm-page-scene__map" />
++          <path d="M104 111q56-76 144-8m-142 15q48 47 139 17m-89-80q-2 56 34 116" className={draw} />
++          <circle cx="112" cy="108" r="5" className={node} />
++          <circle cx="202" cy="82" r="5" className={softNode} />
++          <circle cx="245" cy="137" r="5" className={node} />
++          <circle cx="156" cy="157" r="4" className={softNode} />
++          <path d="M34 180h292" className={line} />
++        </g>
++      );
++      break;
++    case "country":
++      art = (
++        <g>
++          <path d="M72 152h216M96 152V81l84-34 84 34v71M121 152V98h37v54m30 0V98h37v54" className={line} />
++          <path d="M180 47V29m-8 9 8-9 8 9" className={accent} />
++          <path d="M63 169h234" className={draw} />
++          <circle cx="180" cy="80" r="8" className={node} />
++          <circle cx="180" cy="80" r="24" className="tm-page-scene__halo" />
++          <text x="180" y="190" textAnchor="middle" className="tm-page-scene__micro">LOCAL SITE · COMMON STANDARD</text>
++        </g>
++      );
++      break;
++    case "process":
++      art = (
++        <g>
++          <path d="M48 108h266" className={draw} />
++          {Array.from({ length: 8 }, (_, i) => {
++            const x = 48 + i * 38;
++            return (
++              <g key={i} className="tm-page-scene__lift" style={{ animationDelay: `${i * 110}ms` }}>
++                <circle cx={x} cy="108" r="11" className={i === 3 ? "tm-page-scene__core" : "tm-page-scene__chip"} />
++                <text x={x} y="110.5" textAnchor="middle" className="tm-page-scene__svg-label">{String(i + 1).padStart(2, "0")}</text>
++              </g>
++            );
++          })}
++          <path d="M48 84V65h39m38 67v20h39m38-68V65h39m38 67v20h39" className={line} />
++          <circle cx="48" cy="108" r="3" className={node} />
++          <circle cx="314" cy="108" r="3" className={node} />
++        </g>
++      );
++      break;
++    case "industries":
++      art = (
++        <g>
++          <circle cx="180" cy="108" r="27" className="tm-page-scene__core" />
++          <text x="180" y="111" textAnchor="middle" className="tm-page-scene__svg-label">DC</text>
++          <path d="M180 81V48m24 74 40 23m-88-23-40 23m-3-51H72m216 0h-33" className={draw} />
++          <rect x="145" y="24" width="70" height="28" rx="6" className="tm-page-scene__chip" />
++          <rect x="39" y="91" width="57" height="28" rx="6" className="tm-page-scene__chip" />
++          <rect x="264" y="91" width="57" height="28" rx="6" className="tm-page-scene__chip" />
++          <rect x="74" y="150" width="74" height="28" rx="6" className="tm-page-scene__chip" />
++          <rect x="212" y="150" width="74" height="28" rx="6" className="tm-page-scene__chip" />
++          <circle cx="180" cy="38" r="4" className={node} />
++          <circle cx="67" cy="105" r="4" className={softNode} />
++          <circle cx="293" cy="105" r="4" className={node} />
++        </g>
++      );
++      break;
++    case "insights":
++      art = (
++        <g>
++          <path d="M48 167h268M48 55v112" className={line} />
++          {[0, 1, 2, 3, 4, 5].map((i) => <path key={i} d={`M${78 + i * 37} 167v-${26 + ((i * 19) % 64)}`} className={i === 4 ? accent : line} />)}
++          <path d="M66 131q39-5 61-36t50 3q26 36 51-8t68-28" className={draw} />
++          <circle cx="296" cy="62" r="5" className={node} />
++          <path d="M66 45h94" className={line} />
++          <text x="68" y="39" className="tm-page-scene__micro">FIELD SIGNAL / 01</text>
++        </g>
++      );
++      break;
++    case "article":
++      art = (
++        <g>
++          <rect x="86" y="34" width="154" height="151" rx="7" className={line} />
++          <path d="M107 57h112m-112 13h83" className={accent} />
++          <path d="M107 89h112m-112 13h112m-112 13h89m-89 13h106" className={line} />
++          <path d="M250 77h42v77h-42" className={draw} />
++          <circle cx="271" cy="91" r="5" className={node} />
++          <path d="M260 108h21m-21 12h21m-21 12h14" className={line} />
++          <circle cx="103" cy="162" r="7" className="tm-page-scene__halo" />
++        </g>
++      );
++      break;
++    case "projects":
++      art = (
++        <g>
++          <path d="M52 68h254M52 108h254M52 148h254" className={line} />
++          <path d="M68 68h90m-50 40h118m-79 40h119" className={accent} />
++          {[68, 158, 108, 226, 79, 198, 277].map((x, i) => <circle key={i} cx={x} cy={68 + (i < 2 ? 0 : i < 4 ? 40 : 80)} r="4" className={i === 3 ? node : softNode} style={{ animationDelay: `${i * 120}ms` }} />)}
++          <path d="M68 48v120m90-120v40m68 0v40m51-60v60" className={draw} />
++          <text x="52" y="184" className="tm-page-scene__micro">SCOPE</text>
++          <text x="268" y="184" textAnchor="end" className="tm-page-scene__micro">HANDOVER</text>
++        </g>
++      );
++      break;
++    case "project":
++      art = (
++        <g>
++          <path d="M64 160 180 45l116 115M86 160l94-92 94 92M112 160l68-66 68 66M64 160h232" className={line} />
++          <path d="M100 124h42v36m36-92v92m36-55h42v55" className={accent} />
++          <path d="M84 175h192M180 31v14m-7-7 7-7 7 7" className={draw} />
++          <circle cx="180" cy="94" r="5" className={node} />
++          <circle cx="142" cy="124" r="4" className={softNode} />
++          <circle cx="218" cy="124" r="4" className={softNode} />
++        </g>
++      );
++      break;
++    case "policy":
++      art = (
++        <g>
++          <rect x="78" y="30" width="144" height="160" rx="8" className={line} />
++          <path d="M99 55h80m-80 15h101m-101 25h101m-101 14h92m-92 14h101" className={line} />
++          <circle cx="251" cy="137" r="38" className="tm-page-scene__orbit" />
++          <circle cx="251" cy="137" r="23" className="tm-page-scene__core" />
++          <path d="m240 137 8 8 15-18" className={accent} />
++          <text x="251" y="185" textAnchor="middle" className="tm-page-scene__micro">CONTROLLED</text>
++        </g>
++      );
++      break;
++    case "portal":
++      art = (
++        <g>
++          <rect x="48" y="42" width="264" height="132" rx="9" className={line} />
++          <path d="M48 68h264" className={line} />
++          <circle cx="65" cy="55" r="3" className={node} />
++          <path d="M78 55h55" className={line} />
++          <rect x="68" y="84" width="68" height="34" rx="5" className="tm-page-scene__chip" />
++          <rect x="146" y="84" width="68" height="34" rx="5" className="tm-page-scene__chip" />
++          <rect x="224" y="84" width="68" height="34" rx="5" className="tm-page-scene__chip" />
++          <path d="M68 145q24-23 48 0t48 0q24-23 48 0t48 0" className={accent} />
++          <circle cx="278" cy="145" r="4" className={node} />
++        </g>
++      );
++      break;
++    case "not-found":
++      art = (
++        <g>
++          <rect x="116" y="34" width="128" height="150" rx="8" className={line} />
++          {[0, 1, 2, 3].map((i) => <rect key={i} x="131" y={49 + i * 31} width="98" height="22" rx="4" className={i === 2 ? "tm-page-scene__bay tm-page-scene__bay--empty" : "tm-page-scene__bay"} />)}
++          <path d="M145 60h55m-55 31h70m-55 62h42" className={line} />
++          <circle cx="216" cy="60" r="3" className={node} />
++          <circle cx="216" cy="91" r="3" className={softNode} />
++          <path d="M163 115h34m-17-17v34" className={accent} />
++          <text x="180" y="202" textAnchor="middle" className="tm-page-scene__micro">POSITION AVAILABLE</text>
++        </g>
++      );
++      break;
++    default:
++      art = <circle cx="180" cy="108" r="54" className="tm-page-scene__orbit" />;
++  }
++
++  return art;
++}
++
++/** Small, page-specific animated schematic. Deliberately not used on the homepage. */
++export function PageScene({
++  variant,
++  context,
++  className = "",
++}: {
++  variant: string;
++  context?: string;
++  className?: string;
++}) {
++  const kind = PAGE_SCENES[variant] ?? SERVICE_SCENES[variant] ?? "services";
++  const copy = SCENE_COPY[kind];
++
++  return (
++    <div className={`tm-page-scene tm-page-scene--${kind} ${className}`} aria-hidden="true">
++      <div className="tm-page-scene__frame">
++        <div className="tm-page-scene__header">
++          <span>{copy.code}</span>
++          <span className="tm-page-scene__status"><i /> FIELD SYSTEM</span>
++        </div>
++        <svg className="tm-page-scene__svg" viewBox="0 0 360 220" fill="none" xmlns="http://www.w3.org/2000/svg">
++          <path d="M24 197H336M24 23H336" className="tm-page-scene__hairline" />
++          <path d="M32 32v158m296-158v158" className="tm-page-scene__hairline" />
++          <SceneDrawing kind={kind} />
++        </svg>
++        <div className="tm-page-scene__footer">
++          <span>{copy.caption}</span>
++          <span>{context || "TM / FIELD"}</span>
++        </div>
++        <span className="tm-page-scene__beam" />
++      </div>
++    </div>
++  );
++}
