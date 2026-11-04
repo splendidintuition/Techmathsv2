@@ -270,14 +270,14 @@ create table if not exists public.saved_views (
   unique (user_id, entity, name)
 );
 
-create index if not exists assets_site_idx on public.assets(site_id);
-create index if not exists assets_org_idx on public.assets(organization_id);
-create index if not exists assets_parent_idx on public.assets(parent_id);
-create index if not exists asset_events_asset_idx on public.asset_events(asset_id, created_at desc);
-create index if not exists templates_org_idx on public.ticket_templates(organization_id);
-create index if not exists plans_next_run_idx on public.recurring_plans(next_run_at) where is_active;
-create index if not exists tickets_scheduled_idx on public.tickets(scheduled_for);
-create index if not exists user_permissions_user_idx on public.user_permissions(user_id);
+create index if not exists assets_sites_id_idx on public.assets(site_id);
+create index if not exists assets_org_id_idx on public.assets(organization_id);
+create index if not exists assets_parent_id_idx on public.assets(parent_id);
+create index if not exists asset_events_asset_id_idx on public.asset_events(asset_id, created_at desc);
+create index if not exists templates_org_id_idx on public.ticket_templates(organization_id);
+create index if not exists plans_next_run_at_idx on public.recurring_plans(next_run_at) where is_active;
+create index if not exists tickets_scheduled_for_idx on public.tickets(scheduled_for);
+create index if not exists user_permissions_user_id_idx on public.user_permissions(user_id);
 
 drop trigger if exists ticket_templates_updated_at on public.ticket_templates;
 create trigger ticket_templates_updated_at before update on public.ticket_templates for each row execute function public.set_updated_at();
@@ -532,7 +532,7 @@ begin
       end if;
     elsif p_action = 'tag' and coalesce(trim(p_value), '') <> '' then
       update public.tickets
-        set tags = (select array_agg(distinct t) from unnest(array_append(tags, trim(p_value))) t)
+        set tags = (select array_agg(distinct tag_value) from unnest(array_append(tags, trim(p_value))) tag_value)
         where id = ticket_record.id;
     elsif p_action = 'close' then
       update public.tickets set status = 'closed', closed_at = now() where id = ticket_record.id;
@@ -882,13 +882,13 @@ begin
       plan_row.category, plan_row.priority, plan_row.title, plan_row.description, plan_row.next_run_at
     ) returning id into new_ticket_id;
 
-    step := case plan_row.cadence
+    step := (case plan_row.cadence
       when 'weekly' then interval '1 week'
       when 'monthly' then interval '1 month'
       when 'quarterly' then interval '3 months'
       when 'yearly' then interval '1 year'
       else interval '1 month'
-    end * greatest(plan_row.interval_count, 1);
+    end) * greatest(plan_row.interval_count, 1);
 
     update public.recurring_plans
       set next_run_at = next_run_at + step,
@@ -1103,13 +1103,14 @@ $$;
 
 create or replace function public.portal_capacity(p_days integer default 7)
 returns jsonb language plpgsql security definer set search_path = '' as $$
+declare
+  result jsonb;
 begin
   if (select auth.uid()) is null or not public.is_internal_user() then
     raise exception 'not_authorized' using errcode = '42501';
   end if;
 
-  return (
-    select coalesce(jsonb_agg(row_to_json(day)::jsonb), '[]'::jsonb)
+  select coalesce(jsonb_agg(to_jsonb(day)), '[]'::jsonb) into result
     from (
       select
         to_char(d.day, 'YYYY-MM-DD') as date,
@@ -1125,8 +1126,9 @@ begin
         (now() + ((greatest(coalesce(p_days, 7), 1) - 1) || ' days')::interval)::date,
         interval '1 day'
       ) as d(day)
-    ) day
-  );
+    ) day;
+
+  return result;
 end;
 $$;
 
@@ -1255,12 +1257,14 @@ begin
     returning id into site_id;
   end if;
 
-  insert into public.assets (organization_id, site_id, kind, name, status, is_demo, created_by)
-  values (org_id, site_id, 'room', 'Hall A', 'in_service', true, actor)
-  on conflict do nothing
-  returning id into room_id;
+  select a.id into room_id from public.assets a
+    where a.organization_id = org_id and a.kind = 'room' and a.is_demo = true
+    limit 1;
+  if room_id is null then
+    insert into public.assets (organization_id, site_id, kind, name, status, is_demo, created_by)
+    values (org_id, site_id, 'room', 'Hall A', 'in_service', true, actor)
+    returning id into room_id;
 
-  if room_id is not null then
     insert into public.assets (organization_id, site_id, parent_id, kind, name, status, room, is_demo, created_by)
     values (org_id, site_id, room_id, 'row', 'Row A1', 'in_service', 'Hall A', true, actor)
     returning id into row_id;
@@ -1432,8 +1436,11 @@ create policy assets_select on public.assets
 
 drop policy if exists assets_write on public.assets;
 create policy assets_write on public.assets
-  for all to authenticated using (public.has_portal_permission('assets.edit'))
-  with check (public.has_portal_permission('assets.edit'));
+  for all to authenticated using (
+    public.has_portal_permission('assets.edit') and public.is_internal_user()
+  ) with check (
+    public.has_portal_permission('assets.edit') and public.is_internal_user()
+  );
 
 drop policy if exists asset_events_select on public.asset_events;
 create policy asset_events_select on public.asset_events
