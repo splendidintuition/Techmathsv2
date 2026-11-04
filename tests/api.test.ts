@@ -1,11 +1,11 @@
-import { afterAll, describe, expect, it, vi } from "vitest";
-import fs from "node:fs";
-import os from "node:os";
-import path from "node:path";
+import { describe, expect, it, vi } from "vitest";
 import { NextRequest } from "next/server";
 
-const tmpDb = path.join(os.tmpdir(), `tm-api-${process.pid}-${Date.now()}.db`);
-process.env.TECHMATHS_DB = tmpDb;
+vi.mock("@/lib/store", async () => {
+  const { createFakeStore } = await import("./helpers/fake-store");
+  return createFakeStore();
+});
+
 process.env.ADMIN_TOKEN = "test-token-123";
 
 const { POST: createLeadRoute, GET: listLeadRoute } = await import("@/app/api/leads/route");
@@ -14,8 +14,8 @@ const { GET: searchRoute } = await import("@/app/api/search/route");
 const { GET: health } = await import("@/app/api/health/route");
 const { GET: download } = await import("@/app/api/download/[slug]/route");
 const { PATCH: patchLead } = await import("@/app/api/admin/leads/[id]/route");
-const queries = await import("@/lib/queries");
-const { listLeads } = queries;
+const store = await import("@/lib/store");
+const { listLeads } = store;
 
 const json = (body: unknown) => new NextRequest("http://localhost/api", {
   method: "POST",
@@ -50,9 +50,7 @@ describe("POST /api/leads", () => {
 
   it("returns an explicit 503 when storage is unavailable, without claiming success", async () => {
     const log = vi.spyOn(console, "error").mockImplementation(() => undefined);
-    const storage = vi.spyOn(queries, "createLead").mockImplementationOnce(() => {
-      throw new Error("SQLITE_READONLY: attempt to write a readonly database");
-    });
+    const storage = vi.spyOn(store, "createLead").mockRejectedValueOnce(new Error("connection refused"));
     try {
       const res = await createLeadRoute(json(validLead));
       expect(res.status).toBe(503);
@@ -67,8 +65,8 @@ describe("POST /api/leads", () => {
     }
   });
 
-  it("persists the lead with its parsed fields", () => {
-    const leads = listLeads();
+  it("persists the lead with its parsed fields", async () => {
+    const leads = await listLeads();
     expect(leads.length).toBeGreaterThan(0);
     const lead = leads.find((l) => l.email === "ana@example.com");
     expect(lead).toBeTruthy();
@@ -94,12 +92,12 @@ describe("POST /api/leads", () => {
   });
 
   it("accepts a honeypot submission but stores nothing routable", async () => {
-    const before = listLeads().length;
+    const before = (await listLeads()).length;
     const res = await createLeadRoute(json({ ...validLead, website: "http://bots.example" }));
     expect(res.status).toBe(200);
     const data = (await res.json()) as { reference: string };
     expect(data.reference).toBe("TM-0000-0000");
-    expect(listLeads()).toHaveLength(before);
+    expect(await listLeads()).toHaveLength(before);
   });
 
   it("requires the admin cookie to list leads", async () => {
@@ -175,7 +173,7 @@ describe("GET /api/download/[slug]", () => {
 
 describe("PATCH /api/admin/leads/[id]", () => {
   it("rejects an unauthenticated status change", async () => {
-    const lead = listLeads()[0];
+    const [lead] = await listLeads();
     const res = await patchLead(
       new NextRequest("http://localhost/x", { method: "PATCH", body: JSON.stringify({ status: "won" }) }),
       { params: Promise.resolve({ id: String(lead.id) }) }
@@ -184,7 +182,7 @@ describe("PATCH /api/admin/leads/[id]", () => {
   });
 
   it("updates status when authenticated", async () => {
-    const lead = listLeads()[0];
+    const [lead] = await listLeads();
     const res = await patchLead(
       new NextRequest("http://localhost/x", {
         method: "PATCH",
@@ -194,11 +192,11 @@ describe("PATCH /api/admin/leads/[id]", () => {
       { params: Promise.resolve({ id: String(lead.id) }) }
     );
     expect(res.status).toBe(200);
-    expect(listLeads().find((l) => l.id === lead.id)?.status).toBe("qualified");
+    expect((await listLeads()).find((l) => l.id === lead.id)?.status).toBe("qualified");
   });
 
   it("rejects an unknown status value", async () => {
-    const lead = listLeads()[0];
+    const [lead] = await listLeads();
     const res = await patchLead(
       new NextRequest("http://localhost/x", {
         method: "PATCH",
@@ -208,6 +206,18 @@ describe("PATCH /api/admin/leads/[id]", () => {
       { params: Promise.resolve({ id: String(lead.id) }) }
     );
     expect(res.status).toBe(422);
+  });
+
+  it("404s for a lead that does not exist", async () => {
+    const res = await patchLead(
+      new NextRequest("http://localhost/x", {
+        method: "PATCH",
+        headers: { cookie: "tm_admin=test-token-123" },
+        body: JSON.stringify({ status: "won" }),
+      }),
+      { params: Promise.resolve({ id: "99999" }) }
+    );
+    expect(res.status).toBe(404);
   });
 
   it("rejects a non-numeric id", async () => {
@@ -237,8 +247,4 @@ describe("GET /api/health", () => {
     expect(data.checks.content.projects).toBeGreaterThan(0);
     expect(data.checks.content.insights).toBeGreaterThan(0);
   });
-});
-
-afterAll(() => {
-  for (const suffix of ["", "-wal", "-shm"]) fs.rmSync(tmpDb + suffix, { force: true });
 });

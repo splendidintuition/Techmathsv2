@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { addSubscriber } from "@/lib/queries";
+import { addSubscriber } from "@/lib/store";
 import { subscribeSchema } from "@/lib/validation";
 
 export const runtime = "nodejs";
@@ -26,6 +26,15 @@ export async function POST(req: Request) {
     return NextResponse.json({ ok: true, duplicate: false });
   }
 
-  const result = addSubscriber(parsed.data.email);
+  let result: { ok: boolean; duplicate: boolean };
+  try {
+    result = await addSubscriber(parsed.data.email);
+  } catch (err) {
+    console.error("[subscribe] could not store subscriber", err);
+    return NextResponse.json(
+      { ok: false, error: "Sign-up is temporarily unavailable. Please try again shortly." },
+      { status: 503 }
+    );
+  }
   return NextResponse.json({ ok: result.ok, duplicate: result.duplicate }, { status: result.duplicate ? 200 : 201 });
 }

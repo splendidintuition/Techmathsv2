@@ -37,8 +37,6 @@ const nextConfig: NextConfig = {
   reactStrictMode: true,
   poweredByHeader: false,
   compress: true,
-  // better-sqlite3 is a native module: keep it out of the bundler.
-  serverExternalPackages: ["better-sqlite3"],
   allowedDevOrigins: ["*.e2b.app", "127.0.0.1", "localhost"],
   async headers() {
     return [{ source: "/(.*)", headers: securityHeaders }];

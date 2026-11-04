@@ -1,6 +1,7 @@
 import crypto from "node:crypto";
 import { NextResponse, type NextRequest } from "next/server";
-import { createLead, listLeads } from "@/lib/queries";
+import { createLead, listLeads } from "@/lib/store";
+import type { Lead } from "@/lib/types";
 import { quoteSchema, spamScore } from "@/lib/validation";
 
 export const runtime = "nodejs";
@@ -50,9 +51,9 @@ export async function POST(req: NextRequest) {
     });
   }
 
-  let lead: ReturnType<typeof createLead>;
+  let lead: Lead;
   try {
-    lead = createLead({
+    lead = await createLead({
       name: data.name,
       email: data.email,
       company: data.company,
@@ -73,7 +74,6 @@ export async function POST(req: NextRequest) {
       ipHash: hashIp(req),
     });
   } catch (err) {
-    // A serverless deployment may not have a writable/persistent database.
     // Never turn a storage failure into a successful quote acknowledgement.
     console.error("[leads] could not persist quote request", err);
     return NextResponse.json(
@@ -121,5 +121,5 @@ export async function GET(req: NextRequest) {
   if (req.cookies.get("tm_admin")?.value !== process.env.ADMIN_TOKEN) {
     return NextResponse.json({ ok: false, message: "Unauthorised" }, { status: 401 });
   }
-  return NextResponse.json({ ok: true, leads: listLeads(200) });
+  return NextResponse.json({ ok: true, leads: await listLeads(200) });
 }

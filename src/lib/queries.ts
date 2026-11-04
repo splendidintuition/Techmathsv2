@@ -1,80 +1,29 @@
-import { getDb, parseJson, stringifyJson } from "./db";
-import { seedContent } from "./seed";
-import type {
-  CoverageCountry,
-  Industry,
-  Insight,
-  Lead,
-  LeadInput,
-  Project,
-  Service,
-  TeamMember,
-  Testimonial,
-} from "./types";
+import { COVERAGE, INDUSTRIES, TEAM, TESTIMONIALS } from "./content/site";
+import { INSIGHTS } from "./content/insights";
+import { PROJECTS } from "./content/projects";
+import { SERVICES } from "./content/services";
+import type { CoverageCountry, Industry, Insight, Project, Service, TeamMember, Testimonial } from "./types";
 
-declare global {
-  // eslint-disable-next-line no-var
-  var __techmathsSeeded: boolean | undefined;
-}
+/**
+ * Published catalogue content (services, projects, insights, industries,
+ * coverage, team, testimonials) is versioned in TypeScript under
+ * src/lib/content and read directly here. It needs no database, so public
+ * pages can be prerendered and never fail on storage.
+ *
+ * Operational data (leads, subscribers, analytics events) lives in Netlify
+ * Database — see src/lib/store.ts.
+ */
 
-/** Seeds versioned content on first use in a process. Cheap: INSERT OR IGNORE. */
-export function ensureSeeded(): void {
-  if (globalThis.__techmathsSeeded) return;
-  const db = getDb();
-  seedContent(db);
-  globalThis.__techmathsSeeded = true;
-}
+const byPosition = <T extends { position: number }>(a: T, b: T) => a.position - b.position;
 
 /* ------------------------------------------------------------------ services */
 
-type ServiceRow = {
-  slug: string;
-  position: number;
-  title: string;
-  short: string;
-  icon: string;
-  summary: string;
-  included: string;
-  excluded: string;
-  deliverables: string;
-  method: string;
-  tooling: string;
-  standards: string;
-  faqs: string;
-  kpis: string;
-  keywords: string;
-};
-
-function mapService(row: ServiceRow): Service {
-  return {
-    slug: row.slug,
-    position: row.position,
-    title: row.title,
-    short: row.short,
-    icon: row.icon,
-    summary: row.summary,
-    included: parseJson<string[]>(row.included, []),
-    excluded: parseJson<string[]>(row.excluded, []),
-    deliverables: parseJson<string[]>(row.deliverables, []),
-    method: parseJson<Service["method"]>(row.method, []),
-    tooling: parseJson<string[]>(row.tooling, []),
-    standards: parseJson<string[]>(row.standards, []),
-    faqs: parseJson<Service["faqs"]>(row.faqs, []),
-    kpis: parseJson<Service["kpis"]>(row.kpis, []),
-    keywords: parseJson<string[]>(row.keywords, []),
-  };
-}
-
 export function listServices(): Service[] {
-  ensureSeeded();
-  const rows = getDb().prepare(`SELECT * FROM services ORDER BY position`).all() as ServiceRow[];
-  return rows.map(mapService);
+  return [...SERVICES].sort(byPosition);
 }
 
 export function getService(slug: string): Service | null {
-  ensureSeeded();
-  const row = getDb().prepare(`SELECT * FROM services WHERE slug = ?`).get(slug) as ServiceRow | undefined;
-  return row ? mapService(row) : null;
+  return SERVICES.find((s) => s.slug === slug) ?? null;
 }
 
 export function serviceTitleMap(): Record<string, string> {
@@ -85,55 +34,8 @@ export function serviceTitleMap(): Record<string, string> {
 
 /* ------------------------------------------------------------------ projects */
 
-type ProjectRow = {
-  slug: string;
-  position: number;
-  title: string;
-  client: string;
-  summary: string;
-  services: string;
-  industries: string;
-  country: string;
-  region: string;
-  year: number;
-  duration: string;
-  team_size: number;
-  challenge: string;
-  scope: string;
-  result: string;
-  metrics: string;
-  quote: string;
-  is_placeholder: number;
-  published: number;
-};
-
-function mapProject(row: ProjectRow): Project {
-  return {
-    slug: row.slug,
-    position: row.position,
-    title: row.title,
-    client: row.client,
-    summary: row.summary,
-    services: parseJson<string[]>(row.services, []),
-    industries: parseJson<string[]>(row.industries, []),
-    country: row.country,
-    region: row.region,
-    year: row.year,
-    duration: row.duration,
-    teamSize: row.team_size,
-    challenge: row.challenge,
-    scope: parseJson<string[]>(row.scope, []),
-    result: row.result,
-    metrics: parseJson<Project["metrics"]>(row.metrics, []),
-    quote: row.quote,
-    isPlaceholder: Boolean(row.is_placeholder),
-  };
-}
-
 export function listProjects(opts: { service?: string; industry?: string; country?: string } = {}): Project[] {
-  ensureSeeded();
-  const rows = getDb().prepare(`SELECT * FROM projects WHERE published = 1 ORDER BY position`).all() as ProjectRow[];
-  let out = rows.map(mapProject);
+  let out = [...PROJECTS].sort(byPosition);
   if (opts.service) out = out.filter((p) => p.services.includes(opts.service as string));
   if (opts.industry) out = out.filter((p) => p.industries.includes(opts.industry as string));
   if (opts.country) out = out.filter((p) => p.country === opts.country);
@@ -141,55 +43,15 @@ export function listProjects(opts: { service?: string; industry?: string; countr
 }
 
 export function getProject(slug: string): Project | null {
-  ensureSeeded();
-  const row = getDb().prepare(`SELECT * FROM projects WHERE slug = ? AND published = 1`).get(slug) as
-    | ProjectRow
-    | undefined;
-  return row ? mapProject(row) : null;
+  return PROJECTS.find((p) => p.slug === slug) ?? null;
 }
 
 /* ------------------------------------------------------------------ insights */
 
-type InsightRow = {
-  slug: string;
-  position: number;
-  title: string;
-  seo_title: string | null;
-  excerpt: string;
-  body: string;
-  kind: string;
-  category: string;
-  author: string;
-  published_on: string;
-  read_minutes: number;
-  download: number;
-  tags: string;
-};
-
-function mapInsight(row: InsightRow): Insight {
-  return {
-    slug: row.slug,
-    position: row.position,
-    title: row.title,
-    seoTitle: row.seo_title ?? undefined,
-    excerpt: row.excerpt,
-    body: row.body,
-    kind: row.kind as Insight["kind"],
-    category: row.category,
-    author: row.author,
-    publishedOn: row.published_on,
-    readMinutes: row.read_minutes,
-    download: Boolean(row.download),
-    tags: parseJson<string[]>(row.tags, []),
-  };
-}
-
 export function listInsights(opts: { category?: string; kind?: string; q?: string; limit?: number } = {}): Insight[] {
-  ensureSeeded();
-  const rows = getDb()
-    .prepare(`SELECT * FROM insights ORDER BY published_on DESC, position`)
-    .all() as InsightRow[];
-  let out = rows.map(mapInsight);
+  let out = [...INSIGHTS].sort(
+    (a, b) => (a.publishedOn < b.publishedOn ? 1 : a.publishedOn > b.publishedOn ? -1 : a.position - b.position)
+  );
   if (opts.category) out = out.filter((i) => i.category === opts.category);
   if (opts.kind) out = out.filter((i) => i.kind === opts.kind);
   if (opts.q) {
@@ -202,9 +64,7 @@ export function listInsights(opts: { category?: string; kind?: string; q?: strin
 }
 
 export function getInsight(slug: string): Insight | null {
-  ensureSeeded();
-  const row = getDb().prepare(`SELECT * FROM insights WHERE slug = ?`).get(slug) as InsightRow | undefined;
-  return row ? mapInsight(row) : null;
+  return INSIGHTS.find((i) => i.slug === slug) ?? null;
 }
 
 export function insightCategories(): { name: string; count: number }[] {
@@ -218,67 +78,29 @@ export function insightCategories(): { name: string; count: number }[] {
 /* ---------------------------------------------------------------- industries */
 
 export function listIndustries(): Industry[] {
-  ensureSeeded();
-  const rows = getDb()
-    .prepare(`SELECT slug, position, title, summary, pressures, services, proof_point AS proofPoint
-              FROM industries ORDER BY position`)
-    .all() as Array<Omit<Industry, "pressures" | "services"> & { pressures: string; services: string }>;
-  return rows.map((r) => ({
-    slug: r.slug,
-    position: r.position,
-    title: r.title,
-    summary: r.summary,
-    pressures: parseJson<string[]>(r.pressures, []),
-    services: parseJson<string[]>(r.services, []),
-    proofPoint: r.proofPoint,
-  }));
+  return [...INDUSTRIES].sort(byPosition);
 }
 
 export function getIndustry(slug: string): Industry | null {
-  return listIndustries().find((i) => i.slug === slug) ?? null;
+  return INDUSTRIES.find((i) => i.slug === slug) ?? null;
 }
 
 /* ------------------------------------------------------------------ coverage */
 
 export function listCoverage(): CoverageCountry[] {
-  ensureSeeded();
-  const rows = getDb()
-    .prepare(`SELECT code, name, region, mobilise_hours AS mobiliseHours, note, hubs, hq
-              FROM coverage ORDER BY mobilise_hours, name`)
-    .all() as Array<Omit<CoverageCountry, "hubs" | "hq"> & { hubs: string; hq: number }>;
-  return rows.map((r) => ({
-    code: r.code,
-    name: r.name,
-    region: r.region,
-    mobiliseHours: r.mobiliseHours,
-    note: r.note,
-    hubs: parseJson<string[]>(r.hubs, []),
-    hq: Boolean(r.hq),
-  }));
+  return [...COVERAGE]
+    .map((c) => ({ ...c, hq: Boolean(c.hq) }))
+    .sort((a, b) => a.mobiliseHours - b.mobiliseHours || (a.name < b.name ? -1 : a.name > b.name ? 1 : 0));
 }
 
 /* ------------------------------------------------------- team / testimonials */
 
 export function listTeam(): TeamMember[] {
-  ensureSeeded();
-  const rows = getDb()
-    .prepare(`SELECT name, role, bio, certifications, is_placeholder AS isPlaceholder FROM team ORDER BY id`)
-    .all() as Array<Omit<TeamMember, "certifications" | "isPlaceholder"> & { certifications: string; isPlaceholder: number }>;
-  return rows.map((r) => ({
-    name: r.name,
-    role: r.role,
-    bio: r.bio,
-    certifications: parseJson<string[]>(r.certifications, []),
-    isPlaceholder: Boolean(r.isPlaceholder),
-  }));
+  return [...TEAM];
 }
 
 export function listTestimonials(): Testimonial[] {
-  ensureSeeded();
-  const rows = getDb()
-    .prepare(`SELECT quote, author, role, company, is_placeholder AS isPlaceholder FROM testimonials ORDER BY id`)
-    .all() as Array<Omit<Testimonial, "isPlaceholder"> & { isPlaceholder: number }>;
-  return rows.map((r) => ({ ...r, isPlaceholder: Boolean(r.isPlaceholder) }));
+  return [...TESTIMONIALS];
 }
 
 /* -------------------------------------------------------------------- search */
@@ -315,160 +137,4 @@ export function search(term: string, limit = 12): SearchHit[] {
     if ((p.title + " " + p.blurb).toLowerCase().includes(q)) hits.push(p);
   }
   return hits.slice(0, limit);
-}
-
-/* --------------------------------------------------------------------- leads */
-
-export function makeReference(): string {
-  const year = new Date().getFullYear();
-  const rand = Math.random().toString(36).slice(2, 7).toUpperCase();
-  return `TM-${year}-${rand}`;
-}
-
-export function createLead(input: LeadInput): Lead {
-  const db = getDb();
-  const reference = makeReference();
-  const info = db
-    .prepare(
-      `INSERT INTO leads
-        (reference, name, email, company, phone, country, site_location, services, racks,
-         servers, ports, timeline, urgency, message, source, consent_privacy,
-         consent_marketing, spam_score, ip_hash)
-       VALUES (@reference, @name, @email, @company, @phone, @country, @siteLocation, @services,
-               @racks, @servers, @ports, @timeline, @urgency, @message, @source,
-               @consentPrivacy, @consentMarketing, @spamScore, @ipHash)`
-    )
-    .run({
-      reference,
-      name: input.name,
-      email: input.email,
-      company: input.company ?? null,
-      phone: input.phone ?? null,
-      country: input.country,
-      siteLocation: input.siteLocation ?? null,
-      services: stringifyJson(input.services),
-      racks: input.racks ?? null,
-      servers: input.servers ?? null,
-      ports: input.ports ?? null,
-      timeline: input.timeline ?? null,
-      urgency: input.urgency ?? null,
-      message: input.message ?? null,
-      source: input.source ?? null,
-      consentPrivacy: input.consentPrivacy ? 1 : 0,
-      consentMarketing: input.consentMarketing ? 1 : 0,
-      spamScore: input.spamScore ?? 0,
-      ipHash: input.ipHash ?? null,
-    });
-
-  const row = db.prepare(`SELECT * FROM leads WHERE id = ?`).get(info.lastInsertRowid) as LeadDbRow;
-  return mapLead(row);
-}
-
-type LeadDbRow = {
-  id: number;
-  reference: string;
-  created_at: string;
-  name: string;
-  email: string;
-  company: string | null;
-  phone: string | null;
-  country: string;
-  site_location: string | null;
-  services: string;
-  racks: number | null;
-  servers: number | null;
-  ports: number | null;
-  timeline: string | null;
-  urgency: string | null;
-  message: string | null;
-  source: string | null;
-  status: string;
-  consent_privacy: number;
-  consent_marketing: number;
-  notified: number;
-};
-
-function mapLead(row: LeadDbRow): Lead {
-  return {
-    id: row.id,
-    reference: row.reference,
-    createdAt: row.created_at,
-    name: row.name,
-    email: row.email,
-    company: row.company ?? undefined,
-    phone: row.phone ?? undefined,
-    country: row.country,
-    siteLocation: row.site_location ?? undefined,
-    services: parseJson<string[]>(row.services, []),
-    racks: row.racks ?? undefined,
-    servers: row.servers ?? undefined,
-    ports: row.ports ?? undefined,
-    timeline: row.timeline ?? undefined,
-    urgency: row.urgency ?? undefined,
-    message: row.message ?? undefined,
-    source: row.source ?? undefined,
-    status: row.status,
-    consentPrivacy: Boolean(row.consent_privacy),
-    consentMarketing: Boolean(row.consent_marketing),
-    notified: Boolean(row.notified),
-  };
-}
-
-export function listLeads(limit = 100): Lead[] {
-  const rows = getDb().prepare(`SELECT * FROM leads ORDER BY datetime(created_at) DESC LIMIT ?`).all(limit) as LeadDbRow[];
-  return rows.map(mapLead);
-}
-
-export function leadStats() {
-  const db = getDb();
-  const total = (db.prepare(`SELECT COUNT(*) AS n FROM leads`).get() as { n: number }).n;
-  const byStatus = db.prepare(`SELECT status, COUNT(*) AS n FROM leads GROUP BY status`).all() as Array<{
-    status: string;
-    n: number;
-  }>;
-  const last30 = (
-    db.prepare(`SELECT COUNT(*) AS n FROM leads WHERE datetime(created_at) >= datetime('now', '-30 days')`).get() as {
-      n: number;
-    }
-  ).n;
-  return { total, byStatus, last30 };
-}
-
-export function setLeadStatus(id: number, status: string): void {
-  getDb().prepare(`UPDATE leads SET status = ? WHERE id = ?`).run(status, id);
-}
-
-export function markLeadNotified(id: number): void {
-  getDb().prepare(`UPDATE leads SET notified = 1 WHERE id = ?`).run(id);
-}
-
-export function addSubscriber(email: string): { ok: boolean; duplicate: boolean } {
-  const db = getDb();
-  const existing = db.prepare(`SELECT id FROM subscribers WHERE email = ?`).get(email.toLowerCase());
-  if (existing) return { ok: true, duplicate: true };
-  db.prepare(`INSERT INTO subscribers (email) VALUES (?)`).run(email.toLowerCase());
-  return { ok: true, duplicate: false };
-}
-
-export function subscriberCount(): number {
-  return (getDb().prepare(`SELECT COUNT(*) AS n FROM subscribers`).get() as { n: number }).n;
-}
-
-export function trackEvent(type: string, data: { path?: string; referrer?: string; country?: string; meta?: unknown } = {}): void {
-  getDb()
-    .prepare(`INSERT INTO events (type, path, referrer, country, meta) VALUES (?, ?, ?, ?, ?)`)
-    .run(type, data.path ?? null, data.referrer ?? null, data.country ?? null, data.meta ? stringifyJson(data.meta) : null);
-}
-
-export function trafficStats(days = 30) {
-  const db = getDb();
-  const views = db
-    .prepare(`SELECT date(at) AS day, COUNT(*) AS n FROM events WHERE type = 'pageview'
-              AND date(at) >= date('now', ?) GROUP BY day ORDER BY day`)
-    .all(`-${days} days`) as Array<{ day: string; n: number }>;
-  const topPaths = db
-    .prepare(`SELECT path, COUNT(*) AS n FROM events WHERE type = 'pageview'
-              AND date(at) >= date('now', ?) GROUP BY path ORDER BY n DESC LIMIT 10`)
-    .all(`-${days} days`) as Array<{ path: string; n: number }>;
-  return { views, topPaths };
 }
