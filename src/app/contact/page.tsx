@@ -144,6 +144,18 @@ export default async function ContactPage({
                 </li>
                 <li>
                   <a
+                    href={`mailto:${COMPANY.helpdeskEmail}`}
+                    className="group flex items-start gap-3 text-[0.9rem] text-mist transition-colors hover:text-accent"
+                  >
+                    <IconMail className="mt-0.5 h-4 w-4 text-accent" />
+                    <span>
+                      {COMPANY.helpdeskEmail}
+                      <span className="mt-1 block text-[0.78rem] text-mute">Technical support and service desk</span>
+                    </span>
+                  </a>
+                </li>
+                <li>
+                  <a
                     href={`tel:${COMPANY.phone.replace(/\s/g, "")}`}
                     className="flex items-start gap-3 text-[0.9rem] text-mist transition-colors hover:text-accent"
                   >
@@ -171,9 +183,7 @@ export default async function ContactPage({
                   </a>
                 </li>
               </ul>
-              <p className="mt-5 rounded-xl border border-[color:var(--tm-line)] bg-[color:var(--tm-panel)] p-3.5 text-[0.78rem] leading-relaxed text-mute">
-                Contact details above are placeholders pending confirmation from the company.
-              </p>
+
             </div>
 
             <div className="card-surface p-7">
@@ -187,14 +197,9 @@ export default async function ContactPage({
               <p className="mt-3 font-mono text-[0.62rem] uppercase tracking-[0.12em] text-mute">
                 Timezone {COMPANY.headquarters.timezone} · CET/CET−1 for European hubs
               </p>
-              <ul className="mt-5 grid gap-2">
-                {COMPANY.offices.slice(1).map((o) => (
-                  <li key={o.city} className="flex items-center justify-between gap-3 text-[0.82rem]">
-                    <span className="text-mist">{o.city}</span>
-                    <span className="font-mono text-[0.6rem] uppercase tracking-[0.12em] text-mute">{o.role}</span>
-                  </li>
-                ))}
-              </ul>
+              <p className="mt-5 border-t border-[color:var(--tm-line)] pt-4 text-[0.82rem] leading-relaxed text-mute">
+                Tech Maths coordinates project delivery across Europe, the UK, the United States and India. Local access and mobilisation are confirmed for each site.
+              </p>
             </div>
 
             <div className="card-surface p-7">

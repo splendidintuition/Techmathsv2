@@ -116,7 +116,7 @@ export const organizationLd = {
   url: SITE_URL,
   email: COMPANY.email,
   telephone: COMPANY.phone,
-  foundingDate: String(COMPANY.founded),
+  ...(COMPANY.founded ? { foundingDate: String(COMPANY.founded) } : {}),
   description:
     "Specialist data center services partner delivering rack and stack, structured cabling, server and network installation, commissioning, remote hands and decommissioning.",
   address: {

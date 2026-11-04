@@ -18,6 +18,7 @@ const NAV = [
   { label: "Projects", href: "/projects" },
   { label: "Insights", href: "/insights" },
   { label: "About", href: "/about" },
+  { label: "Careers", href: "/careers" },
 ];
 
 export function Header({ services }: { services: NavService[] }) {
@@ -104,7 +105,7 @@ export function Header({ services }: { services: NavService[] }) {
                     {item.label}
                   </Link>
                   <div
-                    className={`absolute left-1/2 top-full w-[min(52rem,92vw)] -translate-x-1/2 pt-3 transition-all duration-300 ${
+                    className={`fixed left-1/2 top-[72px] w-[min(52rem,92vw)] -translate-x-1/2 pt-3 transition-all duration-300 ${
                       megaOpen ? "visible opacity-100" : "invisible opacity-0"
                     }`}
                   >

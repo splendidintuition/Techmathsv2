@@ -24,6 +24,12 @@ export function Footer() {
               <a href={`mailto:${COMPANY.email}`} className="flex items-center gap-2.5 text-mute transition-colors hover:text-accent">
                 <IconMail className="h-4 w-4" /> {COMPANY.email}
               </a>
+              <a href={`mailto:${COMPANY.leadsEmail}`} className="flex items-center gap-2.5 text-mute transition-colors hover:text-accent">
+                <IconMail className="h-4 w-4" /> {COMPANY.leadsEmail}
+              </a>
+              <a href={`mailto:${COMPANY.helpdeskEmail}`} className="flex items-center gap-2.5 text-mute transition-colors hover:text-accent">
+                <IconMail className="h-4 w-4" /> {COMPANY.helpdeskEmail}
+              </a>
               <a href={`tel:${COMPANY.phone.replace(/\s/g, "")}`} className="flex items-center gap-2.5 text-mute transition-colors hover:text-accent">
                 <IconPhone className="h-4 w-4" /> {COMPANY.phone}
               </a>
@@ -39,7 +45,7 @@ export function Footer() {
             <p className="mt-6 text-[0.78rem] leading-relaxed text-mute">
               {COMPANY.headquarters.address}
               <br />
-              {COMPANY.legalName} · {COMPANY.registration}
+              {COMPANY.legalName}{COMPANY.registration ? ` · ${COMPANY.registration}` : ""}
             </p>
           </div>
 
@@ -66,6 +72,7 @@ export function Footer() {
                 { href: "/projects", label: "Projects" },
                 { href: "/insights", label: "Insights" },
                 { href: "/about", label: "About and team" },
+                { href: "/careers", label: "Careers" },
                 { href: "/contact", label: "Request a quote" },
               ].map((l) => (
                 <li key={l.href}>
