@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Banknote, BarChart3, FileText, Lock, Radio, ReceiptText, RefreshCw, Settings2, Table2 } from "lucide-react";
+import { Banknote, BarChart3, FileText, Lock, Radio, ReceiptText, RefreshCw, Settings2, Table2, Wallet } from "lucide-react";
 import { controlApi, describeError, humanise } from "@/lib/portal-v2";
 import { supabase } from "@/lib/supabase-browser";
 import {
@@ -17,6 +17,7 @@ import { Button, Empty, ErrorNote, Loading, Panel, Pill, Stat } from "@/componen
 import { MoneyQuotes } from "@/components/portal/v3/money-quotes";
 import { MoneyInvoices } from "@/components/portal/v3/money-invoices";
 import { MoneyRateCards } from "@/components/portal/v3/money-rate-cards";
+import { MoneyExpenses } from "@/components/portal/v3/money-expenses";
 import { MoneySettings } from "@/components/portal/v3/money-settings";
 
 type Site = { id: string; name: string; organization_id: string };
@@ -26,6 +27,7 @@ const TAB_META: Record<string, { label: string; icon: typeof BarChart3 }> = {
   quotes: { label: "Quotes", icon: FileText },
   invoices: { label: "Invoices", icon: ReceiptText },
   rates: { label: "Rate cards", icon: Table2 },
+  expenses: { label: "Expenses", icon: Wallet },
   settings: { label: "Settings", icon: Settings2 },
 };
 
@@ -83,15 +85,18 @@ export function MoneyRoom() {
   const canManageMoney = permissions.has("finance.invoices");
   const canTakePayment = permissions.has("finance.payments");
   const canEditRates = permissions.has("clients.contracts");
+  const canLogExpenses = permissions.has("finance.expenses");
+  const canApproveExpenses = permissions.has("finance.expenses_approve");
   const canSettings = permissions.has("settings.users");
 
   const tabs = useMemo(() => {
     const next: string[] = [];
     if (canManageMoney) next.push("overview", "quotes", "invoices");
     if (canEditRates) next.push("rates");
+    if (canLogExpenses) next.push("expenses");
     if (canSettings) next.push("settings");
     return next;
-  }, [canManageMoney, canEditRates, canSettings]);
+  }, [canManageMoney, canEditRates, canLogExpenses, canSettings]);
 
   const activeTab = tabs.includes(tab) ? tab : tabs[0] ?? "";
 
@@ -205,6 +210,16 @@ export function MoneyRoom() {
           canManage={canEditRates}
           showCost={permissions.has("finance.margins")}
           clients={clients}
+          onChanged={() => void load()}
+        />
+      )}
+
+      {activeTab === "expenses" && (
+        <MoneyExpenses
+          canLog={canLogExpenses}
+          canApprove={canApproveExpenses}
+          clients={clients}
+          sites={sites}
           onChanged={() => void load()}
         />
       )}

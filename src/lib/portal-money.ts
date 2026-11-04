@@ -30,6 +30,29 @@ export const PAYMENT_METHODS: PaymentMethod[] = [
 
 export const LINE_UNITS: LineUnit[] = ["hour", "day", "visit", "unit", "fixed"];
 
+export type ExpenseStatus = "draft" | "submitted" | "approved" | "rejected";
+export type ExpenseCategory =
+  | "travel"
+  | "accommodation"
+  | "parts"
+  | "shipping"
+  | "software"
+  | "subcontract"
+  | "training"
+  | "other";
+
+export const EXPENSE_STATUSES: ExpenseStatus[] = ["draft", "submitted", "approved", "rejected"];
+export const EXPENSE_CATEGORIES: ExpenseCategory[] = [
+  "travel",
+  "accommodation",
+  "parts",
+  "shipping",
+  "software",
+  "subcontract",
+  "training",
+  "other",
+];
+
 const MONEY_ERROR_COPY: Record<string, string> = {
   quote_not_editable: "Only draft quotes can be edited. Cancel it and raise a new one.",
   quote_not_draft: "That quote has already left the building.",
@@ -48,6 +71,19 @@ const MONEY_ERROR_COPY: Record<string, string> = {
   invalid_payment_amount: "Enter a payment amount greater than zero.",
   rate_card_name_required: "Give the rate card a name.",
   invalid_validity_window: "The end date cannot be before the start date.",
+  expense_not_found: "That expense no longer exists.",
+  expense_not_editable: "Only draft or rejected expenses can be edited.",
+  expense_not_submittable: "Only a draft can be submitted for approval.",
+  expense_not_awaiting_review: "That expense is not waiting for a decision.",
+  expense_not_deletable: "Only a draft can be deleted. Reject it instead.",
+  expense_amount_required: "Enter an amount greater than zero.",
+  expense_description_required: "Say what the money was spent on.",
+  expense_receipt_required: "A reimbursable claim needs a receipt link.",
+  expense_site_mismatch: "That site does not belong to the chosen client.",
+  expense_ticket_mismatch: "That ticket does not belong to the chosen client.",
+  expense_self_approval: "You cannot approve your own expense. Ask another admin.",
+  invalid_expense_category: "Pick one of the listed categories.",
+  invalid_vat_rate: "The VAT rate must be between 0 and 100.",
   client_organization_required: "Choose a client first.",
   not_found: "That record no longer exists.",
 };
@@ -226,6 +262,49 @@ export interface MoneyMetrics {
 
 export type MoneyFlags = Record<string, boolean>;
 
+export interface ExpenseRow {
+  id: string;
+  spent_on: string;
+  category: ExpenseCategory;
+  vendor: string;
+  description: string;
+  currency: string;
+  amount_net: number;
+  vat_rate: number;
+  vat_amount: number;
+  amount_gross: number;
+  reimbursable: boolean;
+  receipt_url: string;
+  notes: string;
+  status: ExpenseStatus;
+  organization_id: string | null;
+  client_name: string | null;
+  site_id: string | null;
+  site_name: string | null;
+  ticket_id: string | null;
+  ticket_number: number | null;
+  ticket_title: string | null;
+  submitted_at: string | null;
+  reviewed_at: string | null;
+  reviewed_by_name: string | null;
+  review_note: string;
+  created_by: string | null;
+  created_by_name: string | null;
+  is_demo: boolean;
+  created_at: string;
+}
+
+export interface ExpenseMetrics {
+  counts: { draft: number; submitted: number; approved: number; rejected: number };
+  awaiting_value: number;
+  approved_this_month: number;
+  approved_ytd: number;
+  reimbursable_value: number;
+  vat_reclaimable: number;
+  by_category: Array<{ category: ExpenseCategory; count: number; gross: number }>;
+  generated_at: string;
+}
+
 /* ------------------------------------------------------- pure computations */
 
 const round2 = (value: number) => Math.round((Number(value) + Number.EPSILON) * 100) / 100;
@@ -368,6 +447,54 @@ export function cleanLines(lines: DocumentLine[]) {
     }));
 }
 
+/* ------------------------------------------------------------- expenses */
+
+/** VAT portion of an expense, rounded the way the generated column does. */
+export function expenseVat(net: number, rate: number): number {
+  const amount = Number.isFinite(net) ? Math.max(0, net) : 0;
+  const pct = Number.isFinite(rate) ? Math.min(100, Math.max(0, rate)) : 0;
+  return round2((amount * pct) / 100);
+}
+
+export function expenseGross(net: number, rate: number): number {
+  return round2((Number.isFinite(net) ? Math.max(0, net) : 0) + expenseVat(net, rate));
+}
+
+export function expenseTone(status: ExpenseStatus | string): Tone {
+  switch (status) {
+    case "approved":
+      return "good";
+    case "submitted":
+      return "accent";
+    case "rejected":
+      return "danger";
+    default:
+      return "muted";
+  }
+}
+
+/** Headline numbers for the expenses header, from the rows already on screen. */
+export function expenseSummaryOf(
+  rows: ExpenseRow[],
+  today: Date = new Date(),
+): { awaiting: number; awaitingCount: number; approved: number; reimbursable: number; month: number } {
+  const approvedRows = rows.filter((row) => row.status === "approved");
+  const monthStart = new Date(today.getFullYear(), today.getMonth(), 1).getTime();
+  return {
+    awaiting: round2(rows.filter((row) => row.status === "submitted").reduce((sum, row) => sum + Number(row.amount_gross), 0)),
+    awaitingCount: rows.filter((row) => row.status === "submitted").length,
+    approved: round2(approvedRows.reduce((sum, row) => sum + Number(row.amount_gross), 0)),
+    reimbursable: round2(
+      approvedRows.filter((row) => row.reimbursable).reduce((sum, row) => sum + Number(row.amount_gross), 0),
+    ),
+    month: round2(
+      approvedRows
+        .filter((row) => new Date(`${row.spent_on}T00:00:00`).getTime() >= monthStart)
+        .reduce((sum, row) => sum + Number(row.amount_gross), 0),
+    ),
+  };
+}
+
 /* ------------------------------------------------------------ RPC surface */
 
 export interface ClientOrg {
@@ -435,5 +562,14 @@ export const moneyApi = {
       p_notes: payload.notes ?? "",
     }),
   deletePayment: (id: string) => rpc<boolean>("money_delete_payment", { p_payment_id: id }),
+
+  listExpenses: (status?: string) => rpc<ExpenseRow[]>("money_list_expenses", { p_status: status ?? null }),
+  saveExpense: (payload: Record<string, unknown>) => rpc<string>("money_save_expense", payload),
+  submitExpense: (id: string) => rpc<ExpenseStatus>("money_submit_expense", { p_id: id }),
+  reviewExpense: (id: string, approve: boolean, note = "") =>
+    rpc<ExpenseStatus>("money_review_expense", { p_id: id, p_approve: approve, p_note: note }),
+  deleteExpense: (id: string) => rpc<boolean>("money_delete_expense", { p_id: id }),
+  expenseMetrics: () => rpc<ExpenseMetrics>("money_expense_metrics"),
+
   seedDemo: () => rpc<{ client: string; quote: string; invoice: string }>("money_seed_demo"),
 };
