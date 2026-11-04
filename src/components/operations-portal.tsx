@@ -33,9 +33,10 @@ import { SERVICES } from "@/lib/content/services";
 import { TicketChat } from "@/components/portal/ticket-chat";
 import { LiveMapView } from "@/components/portal/live-map-view";
 import { TimesheetsView } from "@/components/portal/timesheets-view";
+import { ControlRoom } from "@/components/portal/v2/control-room";
 
 type Role = "admin" | "staff" | "freelancer" | "client";
-type Page = "Overview" | "Tickets" | "Live map" | "Timesheets" | "Services" | "Coverage";
+type Page = "Overview" | "Tickets" | "Live map" | "Timesheets" | "Control" | "Services" | "Coverage";
 type Profile = { id: string; role: Role; full_name: string; is_active: boolean };
 type Ticket = {
   id: string;
@@ -585,6 +586,11 @@ export function OperationsPortal() {
     ["Tickets", BriefcaseBusiness],
     ["Live map", Radio],
     ["Timesheets", Clock3],
+    // Release 2: the control console is internal-only. Individual panels are
+    // gated by the permission keys the database returns, not by this list.
+    ...(profile.role === "admin" || profile.role === "staff"
+      ? ([["Control", Activity]] as Array<[Page, any]>)
+      : []),
     ["Services", Wrench],
     ["Coverage", Globe2],
   ];
@@ -750,6 +756,9 @@ export function OperationsPortal() {
 
             {/* LIVE MAP PAGE */}
             {page === "Live map" && <LiveMapView />}
+
+            {/* CONTROL CONSOLE (release 2) */}
+            {page === "Control" && <ControlRoom />}
 
             {/* TIMESHEETS PAGE */}
             {page === "Timesheets" && (
