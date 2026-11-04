@@ -406,3 +406,19 @@
   border: 2px solid var(--tm-ink-2);
 }
 ::-webkit-scrollbar-thumb:hover { background: var(--tm-accent); }
+
+/* Portal interface utilities; scoped classes avoid overriding the marketing site. */
+@utility mono-label {
+  font-family: var(--tm-font-mono);
+  font-size: 0.625rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  font-weight: 500;
+}
+
+.bg-grid {
+  background-image:
+    linear-gradient(rgba(41, 230, 255, 0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(41, 230, 255, 0.035) 1px, transparent 1px);
+  background-size: 32px 32px;
+}

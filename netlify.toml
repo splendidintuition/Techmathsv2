@@ -7,6 +7,7 @@
 [build.environment]
   NODE_VERSION = "22"
   NEXT_PUBLIC_SITE_URL = "https://techmaths-dc.com"
+  NEXT_PUBLIC_PORTAL_URL = "https://portal.techmaths-dc.com"
   NEXT_TELEMETRY_DISABLED = "1"
 
 [[plugins]]

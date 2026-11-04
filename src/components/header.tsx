@@ -7,6 +7,7 @@ import { IconArrowUpRight, IconClose, IconMenu, IconSearch } from "./icons";
 import { Wordmark } from "./logo";
 import { ThemeToggle } from "./theme-toggle";
 import { Btn } from "./ui";
+import { portalHref } from "@/lib/portal-url";
 
 type NavService = { slug: string; title: string; short: string };
 
@@ -152,6 +153,10 @@ export function Header({ services }: { services: NavService[] }) {
               <span className="font-mono text-[0.62rem] tracking-[0.12em]">⌘K</span>
             </button>
             <ThemeToggle className="hidden sm:inline-flex" />
+            <div className="hidden items-center gap-1 xl:flex">
+              <Link href={portalHref("client")} className="rounded-full px-3 py-2 text-[0.75rem] text-mute transition-colors hover:text-accent">Client login</Link>
+              <Link href={portalHref("engineer")} className="rounded-full px-3 py-2 text-[0.75rem] text-mute transition-colors hover:text-accent">Engineer login</Link>
+            </div>
             <div className="hidden sm:block">
               <Btn href="/contact" size="sm" arrow>
                 Request a quote
@@ -213,7 +218,11 @@ export function Header({ services }: { services: NavService[] }) {
               </Link>
             ))}
           </div>
-          <div className="mt-8 flex flex-wrap items-center gap-3">
+          <div className="mt-8 grid grid-cols-2 gap-2">
+            <Link href={portalHref("client")} onClick={() => setMenuOpen(false)} className="rounded-full border border-[color:var(--tm-line)] px-3 py-2.5 text-center text-[0.78rem] text-mist">Client login</Link>
+            <Link href={portalHref("engineer")} onClick={() => setMenuOpen(false)} className="rounded-full border border-[color:var(--tm-line)] px-3 py-2.5 text-center text-[0.78rem] text-mist">Engineer login</Link>
+          </div>
+          <div className="mt-4 flex flex-wrap items-center gap-3">
             <Btn href="/contact" arrow onClick={() => setMenuOpen(false)}>
               Request a quote
             </Btn>

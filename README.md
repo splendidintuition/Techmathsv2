@@ -35,10 +35,15 @@ Browser tests cover the cursor, navigation/search, coverage links, quote-form st
 accessibility checks. To test an already running server, set `PLAYWRIGHT_BASE_URL`. A custom Chromium
 binary can be supplied with `PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH`.
 
+## Operations portal
+
+The role-aware Supabase portal is available at `/portal`. Marketing-site header links expose Client and Engineer sign-in, and successful quote submissions link existing customers to the portal. See `docs/OPERATIONS-PORTAL.md` for Supabase configuration, role and RLS details, and remaining deployment steps. Add the public Supabase URL and publishable key from `.env.example` to the deployment environment; never expose a service-role key.
+
 ## Deployment
 
 `netlify.toml` configures the Next.js runtime rather than a static-only export. The canonical origin
-is `https://techmaths-dc.com`; the live `www` host redirects to the apex.
+is `https://techmaths-dc.com`; the live `www` host redirects to the apex. The portal is intended for
+`https://portal.techmaths-dc.com` once DNS and the hosting configuration are set up.
 
 **Production quote intake needs durable storage.** The current SQLite implementation requires a
 persistent, writable disk shared by the application processes. A Netlify Function's local filesystem

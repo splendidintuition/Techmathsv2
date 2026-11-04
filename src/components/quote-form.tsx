@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { IconArrow, IconCheck, ServiceIcon } from "./icons";
 import { Btn } from "./ui";
+import { portalHref } from "@/lib/portal-url";
 
 type ServiceOption = { slug: string; title: string; short: string; icon: string };
 
@@ -200,6 +201,9 @@ export function QuoteForm({
           </Btn>
           <Btn variant="ghost" href="/projects" arrow>
             See what we deliver
+          </Btn>
+          <Btn variant="ghost" href={portalHref()}>
+            Existing client or engineer? Sign in to the portal
           </Btn>
         </div>
       </div>
