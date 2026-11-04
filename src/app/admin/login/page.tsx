@@ -47,7 +47,7 @@ function LoginForm() {
         value={token}
         onChange={(e) => setToken(e.target.value)}
         className="w-full rounded-xl border border-[color:var(--tm-line)] bg-[color:var(--tm-panel)] px-4 py-3 text-[0.95rem] text-mist outline-none transition-colors focus:border-accent"
-        placeholder="ADMIN_TOKEN"
+        placeholder="Passcode"
       />
       {error && (
         <p role="alert" className="mt-3 text-[0.82rem] text-[color:var(--tm-warn)]">
@@ -62,8 +62,7 @@ function LoginForm() {
         {busy ? "Checking…" : "Sign in"}
       </button>
       <p className="mt-4 text-[0.76rem] leading-relaxed text-mute">
-        The passcode comes from the <span className="font-mono text-mist">ADMIN_TOKEN</span> environment variable.
-        In this preview environment it is set in <span className="font-mono text-mist">.env.local</span>.
+        Enter the admin passcode. Contact the site owner if you don&apos;t have it.
       </p>
     </form>
   );
