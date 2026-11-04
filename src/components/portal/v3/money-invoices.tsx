@@ -245,7 +245,17 @@ export function MoneyInvoices({
                 <td className="border-b border-white/[0.06] px-3 py-2.5 align-top">
                   <div className="flex flex-wrap gap-1.5">
                     {canManage && row.status === "draft" && (
-                      <Button onClick={() => void openDetail(row.id).then(() => undefined)}>Edit</Button>
+                      <Button
+                        title="Edit draft"
+                        onClick={() =>
+                          void moneyApi
+                            .getInvoice(row.id)
+                            .then(openEditor)
+                            .catch((caught) => setNote(moneyError(caught).message))
+                        }
+                      >
+                        Edit
+                      </Button>
                     )}
                     {canManage && row.status === "draft" && (
                       <Button

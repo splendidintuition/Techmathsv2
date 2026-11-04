@@ -240,7 +240,15 @@ export function MoneyQuotes({
                 <td className="border-b border-white/[0.06] px-3 py-2.5 align-top">
                   <div className="flex flex-wrap gap-1.5">
                     {canManage && row.status === "draft" && (
-                      <Button onClick={() => void openDetail(row.id).then(() => undefined)} title="Edit draft">
+                      <Button
+                        title="Edit draft"
+                        onClick={() =>
+                          void moneyApi
+                            .getQuote(row.id)
+                            .then(openEditor)
+                            .catch((caught) => setNote(moneyError(caught).message))
+                        }
+                      >
                         Edit
                       </Button>
                     )}
