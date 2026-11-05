@@ -355,3 +355,55 @@ and rate were removed afterwards.
 
 **Not covered:** overhead allocation, multi-currency conversion (everything is reported in the
 document currency), and any payout calculation.
+
+## Agent 19 — Database engineer (R4)
+
+**Brief:** make the three permission keys that do nothing (`clients.edit`, `people.edit_rates`,
+`audit.view`) actually do something, without touching an existing contract.
+
+`20261104160000_portal_v4_clients_sites.sql` adds eight security-definer functions — five for clients
+and sites, two for the engineer directory, one for the audit log — plus grants and a migration audit
+row. Two design decisions matter:
+
+- **Sensitive values are split out, not filtered later.** The access procedure has its own read RPC
+  behind `clients.access_codes`; the client list only ever returns `has_access_notes`. Pay rates come
+  back as `null` unless the caller holds `people.pay_rates`, and `rates_visible` tells the UI which
+  world it is in. The audit row for an access-procedure edit stores character counts, never the text.
+- **Two independent write permissions in one function.** `portal_save_engineer_profile` checks
+  `people.edit_rates` for the rate and `people.onboarding` for verification separately, so Staff can
+  approve an engineer without ever being able to change what that engineer costs.
+
+Verified as real users by setting the JWT claim in-session: admin sees rates and access text, staff
+sees neither, and a client user cannot reach another organization's records.
+
+## Agent 20 — Frontend engineer (R4 console tabs)
+
+**Brief:** three new screens, no new design language.
+
+**Clients** (new tab) — summary stats, search across clients and sites, per-client cards with inline
+site rows and "no access notes" warnings, three modals (client, site, access procedure). The access
+modal carries an explicit warning that the text is permission-gated and excluded from the audit body.
+
+**Engineer directory** (below the People table) — verification pill, masked rate, open tickets,
+30-day approved hours, and an editor that disables the rate field when the permission is absent rather
+than hiding the number.
+
+**Audit** (new tab) — entity filter with suggestions, row-count selector, before → after summaries
+per row, and CSV export built on a shared `csvFromRows` helper with proper RFC 4180 quoting.
+
+Six pure helpers moved into `portal-v2.ts` so they are testable without a browser: `displayRate`,
+`siteSubtitle`, `coverageSummary`, `csvFromRows`, `auditHeadline`, `verificationTone`. Tab gating
+extended: `clients.view|clients.edit` → Clients, `audit.view` → Audit.
+
+## Agent 21 — QA / release engineer (R4)
+
+| Check | Command | Result |
+| --- | --- | --- |
+| Types | `npx tsc --noEmit` | clean |
+| Tests | `npx vitest run` | 140/140 (11 new) |
+| Build | `npm run build` | compiled successfully |
+| Live database | RPCs as admin, staff and client accounts | see the table in `V4-CLIENTS-SITES.md` |
+| Cleanup | QA site, access row, engineer profile, audit rows | removed; sites 0, tickets 0, engineer profiles 1 |
+
+**Not covered:** contacts, client-side team management, credential rotation, time-limited access
+codes, Excel import, and any aggregation of the audit log beyond the last 500 rows.

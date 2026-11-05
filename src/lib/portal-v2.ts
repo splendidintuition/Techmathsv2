@@ -48,6 +48,16 @@ const ERROR_COPY: Record<string, string> = {
   invalid_availability: "Availability must be offline, available or busy.",
   ticket_access_denied: "You cannot reach that ticket.",
   unknown_bulk_action: "That bulk action is not supported.",
+  client_name_required: "Give the client a name.",
+  client_not_found: "That client no longer exists.",
+  site_name_required: "Give the site a name.",
+  site_address_required: "A site needs a street address.",
+  organization_required: "Choose the client this site belongs to.",
+  invalid_geofence: "The geofence must be between 25 and 2000 metres.",
+  invalid_email: "That billing email does not look right.",
+  invalid_rate: "A pay rate cannot be negative.",
+  invalid_currency: "Use a three-letter currency code, for example EUR.",
+  invalid_verification: "Verification must be pending, approved, rejected or suspended.",
   supabase_not_configured: "The portal is not connected to its database. Check the deployment environment.",
 };
 
@@ -116,9 +126,74 @@ export interface PortalUser {
   scopes: Array<{ type: ScopeType; value: string }>;
 }
 
+export interface ClientSite {
+  id: string;
+  name: string;
+  address: string;
+  country_code: string | null;
+  latitude: number | null;
+  longitude: number | null;
+  geofence_radius_m: number;
+  is_demo: boolean;
+  has_access_notes: boolean;
+  assets: number;
+}
+
+export interface ClientRecord {
+  id: string;
+  name: string;
+  type: string;
+  billing_email: string | null;
+  vat_number: string | null;
+  country_code: string | null;
+  is_demo: boolean;
+  created_at: string;
+  open_tickets: number;
+  sites: ClientSite[];
+}
+
+export interface SiteAccess {
+  site_id: string;
+  site_name: string;
+  instructions: string;
+  updated_at: string | null;
+}
+
+export type VerificationStatus = "pending" | "approved" | "rejected" | "suspended";
+
+export interface EngineerRow {
+  user_id: string;
+  full_name: string;
+  email: string | null;
+  role: AppRole;
+  is_active: boolean;
+  skills: string[];
+  countries: string[];
+  currency: string;
+  availability: Availability;
+  verification_status: VerificationStatus;
+  rating: number | null;
+  has_profile: boolean;
+  hourly_rate: number | null;
+  open_tickets: number;
+  hours_30d: number;
+}
+
+export interface AuditEntry {
+  id: number;
+  entity: string;
+  entity_id: string | null;
+  action: string;
+  actor_id: string | null;
+  actor_name: string | null;
+  actor_email: string | null;
+  before_data: Record<string, unknown> | null;
+  after_data: Record<string, unknown> | null;
+  created_at: string;
+}
+
 export interface PortalMetrics {
-  generated_at: string;
-  tickets: {
+  generated_at: string;  tickets: {
     total: number;
     open: number;
     unassigned: number;
@@ -418,8 +493,77 @@ export function availableTabs(permissions: Set<string>): string[] {
   if (permissions.has("schedule.view") || permissions.has("schedule.recurring")) tabs.push("schedule");
   if (permissions.has("assets.view")) tabs.push("assets");
   if (permissions.has("people.view") || permissions.has("settings.users")) tabs.push("people");
+  if (permissions.has("clients.view") || permissions.has("clients.edit")) tabs.push("clients");
   if (permissions.has("settings.templates")) tabs.push("templates");
+  if (permissions.has("audit.view")) tabs.push("audit");
   return tabs;
+}
+
+/* ------------------------------------------------- R4 read-model helpers */
+
+/** Pay rates are only rendered when the caller holds people.pay_rates. */
+export function displayRate(rate: number | null | undefined, visible: boolean, currency = "EUR"): string {
+  if (!visible) return "hidden";
+  if (rate === null || rate === undefined || !Number.isFinite(Number(rate))) return "not set";
+  return `${Number(rate).toFixed(2)} ${currency}/h`;
+}
+
+/** One-line site subtitle: address, country and geofence, nothing sensitive. */
+export function siteSubtitle(site: Pick<ClientSite, "address" | "country_code" | "geofence_radius_m">): string {
+  const parts = [site.address?.trim()].filter(Boolean) as string[];
+  if (site.country_code) parts.push(site.country_code.toUpperCase());
+  parts.push(`${site.geofence_radius_m} m geofence`);
+  return parts.join(" · ");
+}
+
+/** Coverage summary used in the client list header and empty states. */
+export function coverageSummary(clients: ClientRecord[]): {
+  clients: number;
+  sites: number;
+  withAccess: number;
+  tickets: number;
+} {
+  return clients.reduce(
+    (acc, client) => {
+      acc.clients += 1;
+      acc.sites += client.sites.length;
+      acc.withAccess += client.sites.filter((site) => site.has_access_notes).length;
+      acc.tickets += client.open_tickets;
+      return acc;
+    },
+    { clients: 0, sites: 0, withAccess: 0, tickets: 0 },
+  );
+}
+
+/** RFC 4180-safe CSV. Embedded quotes are doubled; values with , " or newline are quoted. */
+export function csvFromRows(headers: string[], rows: Array<Array<string | number | null | undefined>>): string {
+  const cell = (value: string | number | null | undefined) => {
+    const text = value === null || value === undefined ? "" : String(value);
+    return /[",\n\r]/.test(text) ? `"${text.replace(/"/g, '""')}"` : text;
+  };
+  return [headers.map(cell).join(","), ...rows.map((row) => row.map(cell).join(","))].join("\n");
+}
+
+/** Audit rows say what happened in plain words; the raw action string stays available. */
+export function auditHeadline(entry: Pick<AuditEntry, "entity" | "action">): string {
+  const entity = entry.entity.replace(/_/g, " ");
+  const action = entry.action.split(".").pop() ?? entry.action;
+  return `${entity} → ${action.replace(/_/g, " ")}`;
+}
+
+/** Verification tone for the engineer directory. */
+export function verificationTone(status: string): Tone {
+  switch (status) {
+    case "approved":
+      return "good";
+    case "pending":
+      return "warn";
+    case "rejected":
+    case "suspended":
+      return "danger";
+    default:
+      return "muted";
+  }
 }
 
 /** Point-in-time occupancy of a rack: devices grouped by U slot, highest first. */
@@ -536,6 +680,74 @@ export const controlApi = {
     callRpc<Availability>("set_engineer_availability", { p_status: status }),
   seedDemo: () => callRpc<{ organization: string; site: string; tickets: number }>("portal_seed_demo"),
   purgeDemo: () => callRpc<number>("portal_purge_demo"),
+
+  /* R4 — clients, sites, engineer profiles, audit log */
+  listClients: () =>
+    callRpc<{ clients: ClientRecord[]; generated_at: string }>("portal_list_clients").then((payload) => payload.clients ?? []),
+  saveClient: (args: {
+    id?: string | null;
+    name: string;
+    billingEmail?: string | null;
+    vatNumber?: string | null;
+    countryCode?: string | null;
+  }) =>
+    callRpc<string>("portal_save_client", {
+      p_id: args.id ?? null,
+      p_name: args.name,
+      p_billing_email: args.billingEmail ?? null,
+      p_vat_number: args.vatNumber ?? null,
+      p_country_code: args.countryCode ?? null,
+    }),
+  saveSite: (args: {
+    id?: string | null;
+    organizationId?: string | null;
+    name: string;
+    address: string;
+    countryCode?: string | null;
+    latitude?: number | null;
+    longitude?: number | null;
+    geofenceRadiusM?: number | null;
+  }) =>
+    callRpc<string>("portal_save_site", {
+      p_id: args.id ?? null,
+      p_organization_id: args.organizationId ?? null,
+      p_name: args.name,
+      p_address: args.address,
+      p_country_code: args.countryCode ?? null,
+      p_latitude: args.latitude ?? null,
+      p_longitude: args.longitude ?? null,
+      p_geofence_radius_m: args.geofenceRadiusM ?? 150,
+    }),
+  getSiteAccess: (siteId: string) => callRpc<SiteAccess>("portal_get_site_access", { p_site_id: siteId }),
+  saveSiteAccess: (siteId: string, instructions: string) =>
+    callRpc<boolean>("portal_save_site_access", { p_site_id: siteId, p_instructions: instructions }),
+  listEngineers: () =>
+    callRpc<{ engineers: EngineerRow[]; rates_visible: boolean }>("portal_list_engineers").then((payload) => ({
+      engineers: payload.engineers ?? [],
+      ratesVisible: Boolean(payload.rates_visible),
+    })),
+  saveEngineerProfile: (args: {
+    userId: string;
+    hourlyRate?: number | null;
+    currency?: string | null;
+    verificationStatus?: VerificationStatus | null;
+    skills?: string[] | null;
+    countries?: string[] | null;
+  }) =>
+    callRpc<boolean>("portal_save_engineer_profile", {
+      p_user_id: args.userId,
+      p_hourly_rate: args.hourlyRate ?? null,
+      p_currency: args.currency ?? null,
+      p_verification_status: args.verificationStatus ?? null,
+      p_skills: args.skills ?? null,
+      p_countries: args.countries ?? null,
+    }),
+  listAudit: (filter: { entity?: string; actor?: string | null; limit?: number } = {}) =>
+    callRpc<{ entries: AuditEntry[]; limit: number }>("portal_list_audit", {
+      p_entity: filter.entity && filter.entity.trim() ? filter.entity.trim() : null,
+      p_actor: filter.actor ?? null,
+      p_limit: filter.limit ?? 100,
+    }).then((payload) => payload.entries ?? []),
 };
 
 /** Writes that are plain table operations, still gated by RLS policies. */

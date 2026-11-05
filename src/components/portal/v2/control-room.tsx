@@ -4,11 +4,13 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   BarChart3,
   Boxes,
+  Building2,
   CalendarClock,
   ClipboardList,
   ListChecks,
   Lock,
   Radio,
+  ScrollText,
   Users,
 } from "lucide-react";
 import {
@@ -27,6 +29,9 @@ import { ControlPeople } from "@/components/portal/v2/control-people";
 import { ControlAssets } from "@/components/portal/v2/control-assets";
 import { ControlSchedule } from "@/components/portal/v2/control-schedule";
 import { ControlTemplates } from "@/components/portal/v2/control-templates";
+import { ControlClients } from "@/components/portal/v2/control-clients";
+import { ControlEngineers } from "@/components/portal/v2/control-engineers";
+import { ControlAudit } from "@/components/portal/v2/control-audit";
 
 const TAB_META: Record<string, { label: string; icon: typeof BarChart3 }> = {
   overview: { label: "Control room", icon: BarChart3 },
@@ -34,7 +39,9 @@ const TAB_META: Record<string, { label: string; icon: typeof BarChart3 }> = {
   schedule: { label: "Schedule", icon: CalendarClock },
   assets: { label: "Assets", icon: Boxes },
   people: { label: "People", icon: Users },
+  clients: { label: "Clients", icon: Building2 },
   templates: { label: "Templates", icon: ClipboardList },
+  audit: { label: "Audit", icon: ScrollText },
 };
 
 /**
@@ -179,7 +186,22 @@ export function ControlRoom() {
       {activeTab === "tickets" && <ControlTickets canAssign={permissions.has("tickets.assign")} />}
       {activeTab === "schedule" && <ControlSchedule canManage={permissions.has("schedule.recurring")} />}
       {activeTab === "assets" && <ControlAssets canEdit={permissions.has("assets.edit")} />}
-      {activeTab === "people" && userId && <ControlPeople currentUserId={userId} />}
+      {activeTab === "people" && userId && (
+        <div className="space-y-4">
+          <ControlPeople currentUserId={userId} />
+          <ControlEngineers
+            canEditRates={permissions.has("people.edit_rates")}
+            canEditVerification={permissions.has("people.onboarding")}
+          />
+        </div>
+      )}
+      {activeTab === "clients" && (
+        <ControlClients
+          canEdit={permissions.has("clients.edit")}
+          canSeeAccess={permissions.has("clients.access_codes")}
+        />
+      )}
+      {activeTab === "audit" && <ControlAudit />}
       {activeTab === "templates" && <ControlTemplates canManage={permissions.has("settings.templates")} />}
 
       <p className="pt-1 text-center font-mono text-[9.5px] uppercase tracking-[0.14em] text-[#3F4C5D]">
