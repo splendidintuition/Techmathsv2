@@ -53,6 +53,9 @@ src/components/portal/v2/control-schedule.tsx               14-day capacity + re
 src/components/portal/v2/control-assets.tsx                 inventory tree + U occupancy
 src/components/portal/v2/control-people.tsx                 roles, permissions, scopes
 src/components/portal/v2/control-templates.tsx              templates + raise-from-template
+src/components/portal/v2/control-clients.tsx                 R4 clients, sites, access procedure
+src/components/portal/v2/control-engineers.tsx               R4 engineer directory, rates, verification
+src/components/portal/v2/control-audit.tsx                   R4 audit log viewer + CSV export
 src/components/operations-portal.tsx                        + "Control" nav item (admin/staff only)
 tests/portal-v2.test.ts                                     31 assertions on the pure layer
 db/index.ts                                                 lazy Drizzle client (build unblocked)
