@@ -33,7 +33,7 @@ Every status below was checked in code or in the database; nothing is inferred f
 | Multi-day / multi-site parent projects | ⛔ | No parent/child ticket relationship. |
 | Ticket templates prefilling checklist, hours, price | ✅ | `ticket_templates` + `create_ticket_from_template`, managed in Control → Templates. Price is not part of the template. |
 | Merge, split, link tickets | ⛔ | No relationships, no merge path. |
-| Escalation rules (widen pool, raise pay, SMS) | ⛔ | Offers do not exist as a flow, so there is nothing to escalate. |
+| Escalation rules (widen pool, raise pay, SMS) | ⛔ | Offers now exist (**R5**) and carry a deadline, but nothing widens the pool or raises pay automatically when one lapses. |
 | Major incident mode (room, chat, client status page) | ⛔ | No incident entity. |
 | "View as" impersonation | ⛔ | Not implemented in either direction. |
 
@@ -131,7 +131,7 @@ Every status below was checked in code or in the database; nothing is inferred f
 | --- | --- | --- |
 | Mobile-first, poor-signal tolerance | 🟡 | Portal is responsive at 375 px. No offline/PWA layer. |
 | Availability toggle, weekly schedule, holiday blocks, travel radius | 🟡 | Toggle and `engineer_availability` rows exist; no weekly editor or radius. |
-| Offers with map, travel, pay breakdown, accept/decline | ⛔ | `ticket_offers` table exists, `accept_offer` RPC exists, **nothing creates an offer and no screen shows one**. |
+| Offers with map, travel, pay breakdown, accept/decline | 🟡 | **R5**: send offer with window and optional rate, engineer inbox with countdown, accept, decline with reason, automatic expiry and history. No map preview, no travel time or cost breakdown. |
 | Job pack after acceptance | ⛔ | Not implemented. |
 | Step-by-step workflow, required photos, serial scan | ⛔ | Templates carry a checklist; nothing is enforced or captured. |
 | Voice notes, offline sync | ⛔ | Not implemented. |
@@ -214,7 +214,7 @@ Every status below was checked in code or in the database; nothing is inferred f
 | Message templates and quick replies | ⛔ | Not implemented. |
 | Auto-translation (EN/PT/ES/FR/DE) | ⛔ | Not implemented. |
 | Announcements to all engineers or clients | ⛔ | Not implemented. |
-| Notification channels with quiet hours | ⛔ | No notifications at all. |
+| Notification channels with quiet hours | 🟡 | **R5**: in-app inbox with unread badge, realtime push to the browser, plus triggers for offers, assignment, quote decisions and expense submissions. Email, push, SMS, WhatsApp and quiet hours: not built. |
 | Knowledge base by role | ⛔ | Marketing insights exist; no portal KB. |
 | Ticket by email | ⛔ | Not implemented. |
 | Phone integration | ⛔ | Later phase, not started. |
@@ -247,7 +247,7 @@ Every status below was checked in code or in the database; nothing is inferred f
 
 | Release | Plan scope | Status |
 | --- | --- | --- |
-| R1 core loop | login, roles, tickets, dispatch, offers, chat, photos, time, notifications | 🟡 tickets, roles, chat and time are live; **offers, photos and notifications are not** |
+| R1 core loop | login, roles, tickets, dispatch, offers, chat, photos, time, notifications | 🟡 tickets, roles, chat, time, **offers and in-app notifications** are live; **photos and outbound email/SMS are not** |
 | R2 control | dashboard, templates, bulk actions, custom roles, certificate vault, custom fields, calendar | 🟡 dashboard, templates, bulk actions, per-user roles and schedule are live; **certificate vault and custom fields are not** |
 | R3 field and money | live map, offline PWA, expenses, payouts, invoices, quotes, rate cards, client approvals | 🟡 map, expenses, quotes, invoices, rate cards and margins are live; **payouts, PWA and client approvals are not** |
 | R4 data-centre depth | assets/racks, parts, RAMS and permits, recurring maintenance, contracts and SLA tiers | 🟡 assets, racks and recurring work are live; **parts, RAMS/permits and contracts are not** |
@@ -289,16 +289,24 @@ scored separately above):
 | Status | Items | Share |
 | --- | --- | --- |
 | ✅ live | 11 | 8 % |
-| 🟡 partial | 36 | 27 % |
-| ⛔ missing | 88 | 65 % |
+| 🟡 partial | 38 | 28 % |
+| ⛔ missing | 86 | 64 % |
 | **Total** | **135** | |
 
 Including the roadmap mapping (§11, 5 rows), the seven locked decisions (§13) and the nine permission
-rules (§14) — 156 tracked rows — the split is 18 ✅ / 44 🟡 / 94 ⛔.
+rules (§14) — 156 tracked rows — the split is 18 ✅ / 46 🟡 / 92 ⛔.
 
 Read it this way: the core loop, the money spine and the data-centre inventory are real and enforced in
 the database. What separates this from the plan is breadth — dispatch offers, contracts, parts, safety
 paperwork, reporting, automation and the client-facing half of the portal.
+
+## What R5 changed on this branch
+
+- **§3.2 dispatch offers** — `portal_send_offer`, `portal_respond_offer`, `portal_list_ticket_offers`,
+  `portal_my_offers`, `portal_expire_offers`; per-ticket **Offer** action in Control; **Offers** page.
+- **§5 engineer offers** — accept/decline with countdown, decline reason, automatic expiry and history.
+- **§8 notifications** — `portal_notifications` inbox with triggers on offer, assignment, quote and
+  expense events; header bell with realtime updates. Email delivery still absent.
 
 ## What R4 changed on this branch
 
