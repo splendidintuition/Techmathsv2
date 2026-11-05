@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { FormEvent } from "react";
+import { TicketPartsPanel } from "@/components/portal/v9/ticket-parts-panel";
 import {
   AlertCircle,
   Clock3,
@@ -267,6 +268,9 @@ export function TicketChat({
             </button>
           )}
         </div>
+
+        {/* Parts booked out against this job (hidden for accounts without assets.view) */}
+        <TicketPartsPanel ticketId={ticketId} />
 
         {/* Channel Status Banner */}
         <div className="flex items-center gap-2 border-b border-white/[0.04] bg-white/[0.015] px-5 py-2 text-[10px] text-[#718096]">

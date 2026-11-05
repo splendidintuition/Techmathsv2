@@ -9,6 +9,9 @@ Legend: **✅ live** (screen + database enforcement) · **🟡 partial** (some o
 
 Every status below was checked in code or in the database; nothing is inferred from the plan text.
 
+> For the *plan* of what to build next — decisions needed, technical debt, proposed releases and quick
+> wins — see `docs/PENDING-WORK.md`. This file says what exists; that file says what to do about it.
+
 ---
 
 ## §3.1 Home and command center
@@ -135,7 +138,7 @@ Every status below was checked in code or in the database; nothing is inferred f
 | Job pack after acceptance | ⛔ | Not implemented. |
 | Step-by-step workflow, required photos, serial scan | ⛔ | Templates carry a checklist; nothing is enforced or captured. |
 | Voice notes, offline sync | ⛔ | Not implemented. |
-| Parts used from a catalog | ⛔ | No parts catalog. |
+| Parts used from a catalog | 🟡 | **R9**: catalog, stock and ticket consumption exist and are usable from the console. The engineer app has no parts screen yet, and there is no barcode scan. |
 | Travel log with mileage and receipts | ⛔ | Time categories include travel; no mileage or receipt capture. |
 | Expense claims with receipt capture | 🟡 | **R3.1** claim → submit → approve with a receipt *URL*; no upload. |
 | Earnings dashboard and statements | ⛔ | Not implemented. |
@@ -182,10 +185,10 @@ Every status below was checked in code or in the database; nothing is inferred f
 
 | Plan item | Status | Where it stands |
 | --- | --- | --- |
-| Parts catalog and stock per warehouse or kit | ⛔ | No tables, no screen. |
-| Request parts from a ticket, low-stock alerts, purchase orders | ⛔ | `assets.stock`, `assets.purchase_orders` permissions exist with nothing behind them. |
-| Shipment tracking and goods-received photos | ⛔ | Not implemented. |
-| Returns, RMA, warranty tracking | 🟡 | Warranty dates are stored per asset; returns and RMA are not. |
+| Parts catalog and stock per warehouse or kit | ✅ | **R9**: `parts`, `stock_locations` (warehouse / van / kit / office) and `part_stock`, with a single **Stock** page for the catalog, counts and per-location balances. |
+| Request parts from a ticket, low-stock alerts, purchase orders | ✅ | **R9**: a parts drawer on every ticket books stock out (and returns it on removal); the reorder point drives the low-stock count and filter; purchase orders are raised, sent and received line by line into a location. |
+| Shipment tracking and goods-received photos | 🟡 | **R9** records what arrived, when, into which location and against which order line. Carrier tracking numbers and photo evidence need file storage. |
+| Returns, RMA, warranty tracking | 🟡 | **R9**: removing a part from a ticket returns it to its shelf as a ledger entry, and `ticket_parts.warranty_until` keeps the warranty date per fitted part. A formal RMA workflow (supplier case, credit, replacement) is not built. |
 | Tool and equipment register with calibration | ⛔ | Not implemented. |
 
 ### §7.3 Change and risk control
@@ -288,17 +291,24 @@ scored separately above):
 
 | Status | Items | Share |
 | --- | --- | --- |
-| ✅ live | 14 | 10 % |
-| 🟡 partial | 45 | 33 % |
-| ⛔ missing | 76 | 56 % |
+| ✅ live | 16 | 12 % |
+| 🟡 partial | 47 | 35 % |
+| ⛔ missing | 72 | 53 % |
 | **Total** | **135** | |
 
 Across every tracked row in the document — the plan tables above, the roadmap mapping (§11), the seven
-locked decisions (§13) and the nine permission rules (§14) — 145 rows split 21 ✅ / 47 🟡 / 77 ⛔.
+locked decisions (§13) and the nine permission rules (§14) — 144 rows split 22 ✅ / 49 🟡 / 73 ⛔.
 
 Read it this way: the core loop, the money spine and the data-centre inventory are real and enforced in
 the database. What separates this from the plan is breadth — dispatch offers, contracts, parts, safety
 paperwork, reporting, automation and the client-facing half of the portal.
+
+## What R9 changed on this branch
+
+- **§7.2 parts and stock** — `parts`, `stock_locations`, `part_stock`, `stock_movements`,
+  `ticket_parts`, `purchase_orders`, `purchase_order_lines`; a **Stock** page with catalog, counts and
+  orders; a parts drawer on every ticket; `money_job_margins` now subtracts parts cost.
+- **§5 field app** — parts can be booked out against a job, but only from the console.
 
 ## What R6–R8 changed on this branch
 

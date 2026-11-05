@@ -7,6 +7,7 @@ import {
   Activity,
   AlertCircle,
   BarChart3,
+  Boxes,
   ArrowRight,
   Bell,
   BriefcaseBusiness,
@@ -45,6 +46,7 @@ import { NotificationBell } from "@/components/portal/notification-bell";
 import { ClientRoom } from "@/components/portal/v6/client-room";
 import { ContractsRoom } from "@/components/portal/v7/contracts-room";
 import { ReportsRoom } from "@/components/portal/v8/reports-room";
+import { PartsRoom } from "@/components/portal/v9/parts-room";
 
 type Role = "admin" | "staff" | "freelancer" | "client";
 type Page =
@@ -58,6 +60,7 @@ type Page =
   | "Money"
   | "Contracts"
   | "Reports"
+  | "Stock"
   | "Services"
   | "Coverage";
 type Profile = { id: string; role: Role; full_name: string; is_active: boolean };
@@ -641,6 +644,10 @@ export function OperationsPortal() {
     ...(profile.role === "admin" || profile.role === "staff"
       ? ([["Reports", BarChart3]] as Array<[Page, any]>)
       : []),
+    // Release 9: parts, stock and purchase orders (internal, permission-gated in the console).
+    ...(profile.role === "admin" || profile.role === "staff"
+      ? ([["Stock", Boxes]] as Array<[Page, any]>)
+      : []),
     ["Services", Wrench],
     ["Coverage", Globe2],
   ];
@@ -827,6 +834,9 @@ export function OperationsPortal() {
 
             {/* REPORTS (release 8) */}
             {page === "Reports" && <ReportsRoom />}
+
+            {/* STOCK (release 9) */}
+            {page === "Stock" && <PartsRoom />}
 
             {/* TIMESHEETS PAGE */}
             {page === "Timesheets" && (
