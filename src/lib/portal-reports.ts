@@ -11,7 +11,9 @@ import { PortalV2Error, callRpc, csvFromRows, describeError } from "@/lib/portal
 export type RangeKey = "7d" | "30d" | "90d" | "month" | "quarter";
 
 export interface ReportBucket {
-  key: string;
+  /** Aggregate rows are keyed by `key` (status, priority, month, country); aging rows use `bucket`
+   *  and debtors use `name`, so the discriminator is optional. */
+  key?: string;
   count?: number;
   invoiced?: number;
   collected?: number;
@@ -265,7 +267,7 @@ export function financeCsv(report: FinanceReport): string {
   );
   const months = csvFromRows(
     ["Month", "Invoiced", "Collected"],
-    report.by_month.map((row) => [row.key, row.invoiced ?? 0, row.collected ?? 0]),
+    report.by_month.map((row) => [row.key ?? "", row.invoiced ?? 0, row.collected ?? 0]),
   );
   return [summary, "", clients, "", aging, "", months].join("\n");
 }
