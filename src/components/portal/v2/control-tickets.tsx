@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { CheckSquare, RefreshCw, Tag, Users } from "lucide-react";
+import { CheckSquare, RefreshCw, Send, Tag, Users } from "lucide-react";
 import {
   TICKET_PRIORITIES,
   TICKET_STATUSES,
@@ -15,7 +15,8 @@ import {
   type BulkTicketRow,
   type PortalUser,
 } from "@/lib/portal-v2";
-import { Button, Empty, ErrorNote, Loading, Panel, Pill, TableShell, inputClass } from "@/components/portal/v2/ui";
+import { Button, Empty, ErrorNote, Field, Loading, Modal, Panel, Pill, TableShell, inputClass } from "@/components/portal/v2/ui";
+import { dispatchApi } from "@/lib/portal-dispatch";
 
 /** R2 bulk operations board: select many tickets, act once, audit everything. */
 export function ControlTickets({ canAssign }: { canAssign: boolean }) {
@@ -31,6 +32,11 @@ export function ControlTickets({ canAssign }: { canAssign: boolean }) {
   const [statusFilter, setStatusFilter] = useState("");
   const [action, setAction] = useState<BulkAction>("status");
   const [value, setValue] = useState("");
+  const [offerTicket, setOfferTicket] = useState<BulkTicketRow | null>(null);
+  const [offerEngineer, setOfferEngineer] = useState("");
+  const [offerMinutes, setOfferMinutes] = useState("60");
+  const [offerRate, setOfferRate] = useState("");
+  const [offerBusy, setOfferBusy] = useState(false);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -125,6 +131,30 @@ export function ControlTickets({ canAssign }: { canAssign: boolean }) {
     }
   };
 
+  const sendOffer = async () => {
+    if (!offerTicket || !offerEngineer) return;
+    setOfferBusy(true);
+    setNote("");
+    try {
+      const minutes = Number(offerMinutes);
+      const rate = offerRate.trim() === "" ? null : Number(offerRate);
+      await dispatchApi.sendOffer({
+        ticketId: offerTicket.id,
+        engineerId: offerEngineer,
+        minutes: Number.isFinite(minutes) && minutes > 0 ? minutes : 60,
+        rate: rate !== null && Number.isFinite(rate) ? rate : null,
+      });
+      const name = engineers.find((engineer) => engineer.id === offerEngineer)?.full_name ?? "the engineer";
+      setNote(`Offer sent to ${name}. The ticket is now in the offer pool and the clock is running.`);
+      setOfferTicket(null);
+      await load();
+    } catch (caught) {
+      setNote(describeError(caught).message);
+    } finally {
+      setOfferBusy(false);
+    }
+  };
+
   return (
     <div className="space-y-4">
       {error && <ErrorNote message={error} onRetry={() => void load()} />}
@@ -209,7 +239,7 @@ export function ControlTickets({ canAssign }: { canAssign: boolean }) {
             body="Clear the filters, or seed the demo dataset from the Overview tab to get a realistic board."
           />
         ) : (
-          <TableShell head={["", "Ticket", "Status", "Priority", "SLA", "Tags", "Crew"]}>
+          <TableShell head={["", "Ticket", "Status", "Priority", "SLA", "Tags", "Crew", ""]}>
             <tr>
               <td className="border-b border-white/[0.06] px-3 py-2">
                 <input type="checkbox" checked={allVisibleSelected} onChange={toggleAll} aria-label="Select all visible tickets" />
@@ -257,6 +287,20 @@ export function ControlTickets({ canAssign }: { canAssign: boolean }) {
                     )}
                   </div>
                 </td>
+                <td className="border-b border-white/[0.06] px-3 py-2.5 align-top">
+                  <Button
+                    onClick={() => {
+                      setOfferTicket(row);
+                      setOfferEngineer("");
+                      setOfferMinutes("60");
+                      setOfferRate("");
+                      setNote("");
+                    }}
+                    title="Offer this ticket to an engineer"
+                  >
+                    <Send size={12} /> Offer
+                  </Button>
+                </td>
                 <td className="border-b border-white/[0.06] px-3 py-2.5 align-top font-mono text-[10px] uppercase tracking-[0.1em] text-[#9AA9BC]">
                   {row.assigned_to ? (
                     <span className="inline-flex items-center gap-1">
@@ -271,6 +315,63 @@ export function ControlTickets({ canAssign }: { canAssign: boolean }) {
           </TableShell>
         )}
       </Panel>
+
+      {offerTicket && (
+        <Modal
+          title={`Offer · TM-${String(offerTicket.ticket_number).padStart(5, "0")}`}
+          onClose={() => setOfferTicket(null)}
+        >
+          <div className="space-y-3">
+            <p className="text-[12px] text-[#8A99AB]">
+              {offerTicket.title}. The engineer sees it in <span className="text-[#9DF3FF]">Offers</span> and in their
+              notifications, with a live countdown. Only one engineer can accept.
+            </p>
+            <Field label="Engineer">
+              <select
+                value={offerEngineer}
+                onChange={(event) => setOfferEngineer(event.target.value)}
+                className={inputClass}
+              >
+                <option value="">Choose an engineer…</option>
+                {engineers.map((engineer) => (
+                  <option key={engineer.id} value={engineer.id}>
+                    {engineer.full_name || engineer.email || engineer.id}
+                  </option>
+                ))}
+              </select>
+            </Field>
+            <div className="grid gap-3 sm:grid-cols-2">
+              <Field label="Offer window (minutes)" hint="5 to 2880. Default 60.">
+                <input
+                  value={offerMinutes}
+                  onChange={(event) => setOfferMinutes(event.target.value)}
+                  inputMode="numeric"
+                  className={inputClass}
+                />
+              </Field>
+              <Field label="Offered rate (EUR/h)" hint="Optional — shown to the engineer, used later for payout.">
+                <input
+                  value={offerRate}
+                  onChange={(event) => setOfferRate(event.target.value)}
+                  inputMode="decimal"
+                  placeholder="35.00"
+                  className={inputClass}
+                />
+              </Field>
+            </div>
+            <div className="flex justify-end gap-2 pt-1">
+              <Button onClick={() => setOfferTicket(null)}>Cancel</Button>
+              <Button
+                variant="primary"
+                disabled={offerBusy || !offerEngineer}
+                onClick={() => void sendOffer()}
+              >
+                <Send size={13} /> Send offer
+              </Button>
+            </div>
+          </div>
+        </Modal>
+      )}
     </div>
   );
 }

@@ -407,3 +407,53 @@ extended: `clients.view|clients.edit` → Clients, `audit.view` → Audit.
 
 **Not covered:** contacts, client-side team management, credential rotation, time-limited access
 codes, Excel import, and any aggregation of the audit log beyond the last 500 rows.
+
+## Agent 22 — Database engineer (R5)
+
+**Brief:** make the dispatch loop real, and give every person an inbox, without an email provider.
+
+`20261105090000_portal_v5_dispatch.sql` adds `portal_notifications` (RLS: own rows only, column-level
+`update (read_at)` grant, inserts only through a security-definer helper) and eight RPCs:
+send/respond/list offers, my-offers, expiry housekeeping, notification list and mark-read.
+
+Two rules live in Postgres rather than the client: **one live offer per engineer per ticket** (the
+unique key already enforced it; the RPC now refuses a duplicate instead of erroring obscurely), and
+**expiry is authoritative** — `portal_expire_offers()` runs inside the read RPCs, so a list can never
+present a dead offer as actionable. Accepting assigns the engineer, marks every sibling offer `taken`,
+writes an event and an audit row. Declining records the reason, returns the ticket to `new` when
+nothing else is live, and notifies dispatch.
+
+Three triggers fan out the events that used to die silently: ticket assignment, quote decision and
+expense submission.
+
+**Defect found in live QA:** notification titles rendered as `New job offer \u00b7 …` because a
+JSON-escaped separator was pasted into a SQL string literal, where `\u` is not an escape (Postgres
+needs `E''`). All five functions were recreated with the real character and the migration file now
+matches production exactly.
+
+## Agent 23 — Frontend engineer (R5 offers)
+
+**Brief:** an engineer should be able to answer a job from a phone in ten seconds.
+
+New **Offers** page: actionable cards sorted by the closest deadline with a countdown that ticks
+without a reload, client/site/estimate/rate in one glance, accept in one tap, decline with a reason
+in a modal, and a history list that explains what happened (declined, taken by another engineer,
+expired). The **Control → Bulk actions** board gained a per-ticket **Offer** action with an engineer
+picker, window and optional rate.
+
+Seven pure helpers landed in `portal-dispatch.ts` so the timing logic is testable: `minutesLeft`,
+`offerCountdown`, `actionableOffers`, `offerHistory`, `offerTone`, `relativeTime`,
+`notificationTone`.
+
+## Agent 24 — QA / release engineer (R5)
+
+| Check | Command | Result |
+| --- | --- | --- |
+| Types | `npx tsc --noEmit` | clean |
+| Tests | `npx vitest run` | 148/148 (8 new) |
+| Build | `npm run build` | compiled, `/portal` 134 kB / 273 kB |
+| Live flow | offer → accept as the freelancer | ticket `assigned`, 2 audit rows, admin notified |
+| Cleanup | QA ticket, offer, events, notifications, site | tickets 0, sites 0, offers 0, notifications 0 |
+
+**Not covered:** outbound email/push/SMS, quiet hours, shortlist broadcast, escalation on lapse,
+smart ranking, certificate-gated offers.

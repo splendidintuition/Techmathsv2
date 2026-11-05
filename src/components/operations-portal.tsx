@@ -21,6 +21,7 @@ import {
   MapPin,
   MessageSquare,
   ReceiptText,
+  Send,
   Plus,
   Radio,
   Search,
@@ -36,9 +37,11 @@ import { LiveMapView } from "@/components/portal/live-map-view";
 import { TimesheetsView } from "@/components/portal/timesheets-view";
 import { ControlRoom } from "@/components/portal/v2/control-room";
 import { MoneyRoom } from "@/components/portal/v3/money-room";
+import { OfferInbox } from "@/components/portal/offer-inbox";
+import { NotificationBell } from "@/components/portal/notification-bell";
 
 type Role = "admin" | "staff" | "freelancer" | "client";
-type Page = "Overview" | "Tickets" | "Live map" | "Timesheets" | "Control" | "Money" | "Services" | "Coverage";
+type Page = "Overview" | "Tickets" | "Offers" | "Live map" | "Timesheets" | "Control" | "Money" | "Services" | "Coverage";
 type Profile = { id: string; role: Role; full_name: string; is_active: boolean };
 type Ticket = {
   id: string;
@@ -586,6 +589,10 @@ export function OperationsPortal() {
   const navItems: Array<[Page, any]> = [
     ["Overview", LayoutDashboard],
     ["Tickets", BriefcaseBusiness],
+    // Release 5: dispatch offers. Every role can be offered work except client accounts,
+    // which never appear in the dispatch pool.
+    ...(profile.role === "client" ? [] : ([["Offers", Send]] as Array<[Page, any]>)),
+
     ["Live map", Radio],
     ["Timesheets", Clock3],
     // Release 2: the control console is internal-only. Individual panels are
@@ -683,12 +690,7 @@ export function OperationsPortal() {
               <span className="hidden items-center gap-1.5 rounded-full border border-[#3DDC97]/15 bg-[#3DDC97]/[0.04] px-2.5 py-1.5 text-[9px] text-[#3DDC97] sm:flex">
                 <span className="h-1.5 w-1.5 rounded-full bg-[#3DDC97]" /> LIVE DATA
               </span>
-              <button
-                onClick={() => notify("Realtime event streams active.")}
-                className="relative flex h-9 w-9 items-center justify-center rounded-xl border border-white/[0.07] bg-white/[0.02] text-[#8B97AB] hover:text-white"
-              >
-                <Bell size={15} />
-              </button>
+              <NotificationBell />
               <div className="hidden h-6 border-l border-white/[0.08] sm:block" />
               <div className="hidden text-right sm:block">
                 <div className="text-[10px] font-medium text-[#CAD3E0]">
@@ -766,6 +768,9 @@ export function OperationsPortal() {
 
             {/* CONTROL CONSOLE (release 2) */}
             {page === "Control" && <ControlRoom />}
+
+            {/* OFFERS (release 5) */}
+            {page === "Offers" && <OfferInbox email={session.user.email ?? undefined} />}
 
             {/* MONEY CONSOLE (release 3) */}
             {page === "Money" && <MoneyRoom />}
