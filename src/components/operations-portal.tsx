@@ -1,18 +1,21 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { FormEvent } from "react";
 import type { Session } from "@supabase/supabase-js";
 import {
   Activity,
   AlertCircle,
+  BarChart3,
   ArrowRight,
   Bell,
   BriefcaseBusiness,
+  Building2,
   CheckCircle2,
   ChevronRight,
   Clock3,
   ExternalLink,
+  FileSignature,
   Filter,
   Globe2,
   LayoutDashboard,
@@ -39,9 +42,24 @@ import { ControlRoom } from "@/components/portal/v2/control-room";
 import { MoneyRoom } from "@/components/portal/v3/money-room";
 import { OfferInbox } from "@/components/portal/offer-inbox";
 import { NotificationBell } from "@/components/portal/notification-bell";
+import { ClientRoom } from "@/components/portal/v6/client-room";
+import { ContractsRoom } from "@/components/portal/v7/contracts-room";
+import { ReportsRoom } from "@/components/portal/v8/reports-room";
 
 type Role = "admin" | "staff" | "freelancer" | "client";
-type Page = "Overview" | "Tickets" | "Offers" | "Live map" | "Timesheets" | "Control" | "Money" | "Services" | "Coverage";
+type Page =
+  | "Overview"
+  | "Tickets"
+  | "Offers"
+  | "Workspace"
+  | "Live map"
+  | "Timesheets"
+  | "Control"
+  | "Money"
+  | "Contracts"
+  | "Reports"
+  | "Services"
+  | "Coverage";
 type Profile = { id: string; role: Role; full_name: string; is_active: boolean };
 type Ticket = {
   id: string;
@@ -372,6 +390,14 @@ export function OperationsPortal() {
     };
   }, [session?.user.id]);
 
+  // Release 6: a client account lands in its own workspace on first sign-in, not the ops overview.
+  const clientLanded = useRef(false);
+  useEffect(() => {
+    if (clientLanded.current || !profile) return;
+    clientLanded.current = true;
+    if (profile.role === "client") setPage("Workspace");
+  }, [profile]);
+
   const loadTickets = useCallback(async () => {
     if (!supabase || !session || !profile) return;
     setLoadingTickets(true);
@@ -587,6 +613,8 @@ export function OperationsPortal() {
   }
 
   const navItems: Array<[Page, any]> = [
+    // Release 6: client accounts land in their own workspace — quotes, invoices, requests, sites.
+    ...(profile.role === "client" ? ([["Workspace", Building2]] as Array<[Page, any]>) : []),
     ["Overview", LayoutDashboard],
     ["Tickets", BriefcaseBusiness],
     // Release 5: dispatch offers. Every role can be offered work except client accounts,
@@ -604,6 +632,14 @@ export function OperationsPortal() {
     // the finance permissions the database returns.
     ...(profile.role === "admin" || profile.role === "staff"
       ? ([["Money", ReceiptText]] as Array<[Page, any]>)
+      : []),
+    // Release 7: contracts, SLA tiers, retainers and bundles (internal, permission-gated in the console).
+    ...(profile.role === "admin" || profile.role === "staff"
+      ? ([["Contracts", FileSignature]] as Array<[Page, any]>)
+      : []),
+    // Release 8: reports and CSV exports (internal, permission-gated in the console).
+    ...(profile.role === "admin" || profile.role === "staff"
+      ? ([["Reports", BarChart3]] as Array<[Page, any]>)
       : []),
     ["Services", Wrench],
     ["Coverage", Globe2],
@@ -716,7 +752,7 @@ export function OperationsPortal() {
                   <span className="text-[#374457]">/</span> EU OPERATIONS
                 </div>
                 <h1 className="font-display text-[29px] font-light leading-tight tracking-[-0.04em] text-[#E8EEF9] sm:text-[34px]">
-                  {page === "Overview" ? "Operations overview" : page}
+                  {page === "Overview" ? "Operations overview" : page === "Workspace" ? "Your account" : page}
                   <span className="text-[#38E1FF]">.</span>
                 </h1>
                 <p className="mt-2 text-[11px] text-[#8290A5]">
@@ -763,6 +799,9 @@ export function OperationsPortal() {
               <span className="ml-auto text-[9px] text-[#667389]">Real-time events active</span>
             </div>
 
+            {/* CLIENT WORKSPACE (release 6) */}
+            {page === "Workspace" && <ClientRoom />}
+
             {/* LIVE MAP PAGE */}
             {page === "Live map" && <LiveMapView />}
 
@@ -774,6 +813,12 @@ export function OperationsPortal() {
 
             {/* MONEY CONSOLE (release 3) */}
             {page === "Money" && <MoneyRoom />}
+
+            {/* CONTRACTS (release 7) */}
+            {page === "Contracts" && <ContractsRoom />}
+
+            {/* REPORTS (release 8) */}
+            {page === "Reports" && <ReportsRoom />}
 
             {/* TIMESHEETS PAGE */}
             {page === "Timesheets" && (
