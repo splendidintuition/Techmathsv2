@@ -16,20 +16,21 @@ what to do next*, not another audit.
 | R6 | Client workspace: home, quotes, invoices, requests with sign-off, sites, visit requests | ✅ live |
 | R7 | Contracts: SLA tiers, retainers, prepaid bundles, frameworks; SLA applied by trigger | ✅ live |
 | R8 | Reports: operations, SLA, finance + CSV exports | ✅ live |
+| R9 | Parts catalog, stock per location, ticket consumption, purchase orders, margin on parts | ✅ live |
 | — | Sidebar scroll/sign-out fix | ✅ live |
 
 Coverage of the 135 product requirements in §3–§10:
 
 | | §3.1 | §3.2 | §3.3 | §3.4 | §3.5 | §3.5.1 | §3.6 | §3.7 | §3.8 | §4 | §5 | §6 | §7 | §8 | §9 | §10 | Total |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| ✅ | 0 | 2 | 1 | 1 | 0 | 0 | 2 | 0 | 1 | 0 | 1 | 2 | 3 | 0 | 0 | 1 | **14** |
-| 🟡 | 3 | 2 | 3 | 5 | 3 | 0 | 3 | 0 | 3 | 3 | 5 | 5 | 4 | 2 | 4 | 0 | **45** |
-| ⛔ | 3 | 6 | 2 | 1 | 6 | 2 | 4 | 2 | 3 | 3 | 11 | 6 | 12 | 6 | 3 | 6 | **76** |
+| ✅ | 0 | 2 | 1 | 1 | 0 | 0 | 2 | 0 | 1 | 0 | 1 | 2 | 5 | 0 | 0 | 1 | **16** |
+| 🟡 | 3 | 2 | 3 | 5 | 3 | 0 | 3 | 0 | 3 | 3 | 6 | 5 | 5 | 2 | 4 | 0 | **47** |
+| ⛔ | 3 | 6 | 2 | 1 | 6 | 2 | 4 | 2 | 3 | 3 | 10 | 6 | 9 | 6 | 3 | 6 | **72** |
 | rows | 6 | 10 | 6 | 7 | 9 | 2 | 9 | 2 | 7 | 6 | 17 | 13 | 19 | 8 | 7 | 7 | 135 |
 
-Read it as: the command loop, money, clients/sites, dispatch and reporting are real. What is thin is
-the **field app (§5)**, **data-centre depth (§7)**, **people & compliance (§3.5, §10)** and
-**automation/comms (§3.7, §8)**.
+Read it as: the command loop, money, clients/sites, dispatch, reporting and now inventory are real.
+What is thin is the **field app (§5)**, the remaining **data-centre depth (§7.1, §7.3, §7.4)**,
+**people & compliance (§3.5, §10)** and **automation/comms (§3.7, §8)**.
 
 ---
 
@@ -66,18 +67,11 @@ These are not engineering tasks — they need an answer from you before the next
 Ordered by dependency and by what unblocks the most other rows. Sizes are relative (S ≈ a day,
 M ≈ 2–4 days, L ≈ a week or more).
 
-### R9 — Parts, stock and consumables (§7.2) — **recommended next**
+### R9 — Parts, stock and consumables (§7.2) — **shipped**
 
-| Item | Why first |
-| --- | --- |
-| Parts catalog with stock per warehouse / kit | Blocks "parts used from a ticket", engineer margin accuracy, and the low-stock warnings |
-| Parts requested from a ticket, reservations, low-stock alerts | The single most requested field-app feature |
-| Purchase orders and goods-received | Completes the loop; needs storage only for photos |
-| Tool and equipment register with calibration dates | Pairs with certificates in §3.5 |
-| Returns / RMA / warranty tracking (🟡 today) | Finish the partially built piece |
-
-Why first: it is pure product (no external dependency), it improves every job's margin figure, and
-it unblocks half of §5's field-app rows.
+Catalog, stock per location, one-door ledger, ticket consumption, purchase orders and parts cost in
+job margin. See `docs/V9-PARTS.md`. Still open inside §7.2: carrier tracking, goods-received photos,
+formal RMA and the tool/calibration register.
 
 ### R10 — Field app depth (§5)
 
@@ -187,9 +181,14 @@ Carried over from your standing instructions — a release is not finished until
 
 ## 7. Suggested next step
 
-Start **R9 (parts and stock)**. It has no external dependency, it makes margin honest on every job,
-and it removes the biggest blocker for the field app in R10. The only prerequisites are a decision on
-Supabase Storage (for photos) and the migration-history repair, both small.
+Start **R10 (field app depth)** now that stock exists — the job pack, the step workflow and the
+travel log are what an engineer on site actually needs, and parts is the dependency that was missing.
+Much of R10 needs file storage (photos, receipts, voice notes), so the storage decision is the real
+gate; the workflow, check-in and earnings pieces can ship without it.
+
+If you would rather close the compliance gap first, **R14's trust block** (view-as, session revoke,
+GDPR export/deletion, access end dates) is still the other natural next release and needs neither
+email nor storage.
 
 If you would rather close the compliance gap first, **R14's trust block** (view-as, session revoke,
 GDPR export/deletion, access end dates) is the other natural next release — it is mostly database and

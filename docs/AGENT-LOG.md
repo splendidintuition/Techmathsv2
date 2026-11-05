@@ -513,3 +513,54 @@ its events) were deleted afterwards; the demo dataset was left intact and the mo
 
 **Not covered:** email/SMS delivery, online card payment, PDF rendering, XLSX export, scheduled
 reports, signature capture, cleared-engineer rules, contract renewal workflow.
+
+## Agent 28 — Data engineer (R9 parts and stock)
+
+**Brief:** a part that goes into a rack has to exist somewhere, or margin is fiction.
+
+Seven tables and one law: `part_stock_move` is the only thing that changes stock. It takes an
+absolute count for `adjust` and a delta for everything else, writes the ledger row with the balance
+after it, and refuses to leave a shelf negative. `ticket_part_add` issues first and records the line
+second, so a job can never carry a part the warehouse does not have; `ticket_part_remove` returns it.
+
+Purchase orders receive line by line into a named location, at the price the order was raised at, and
+only close when every line is complete. The one existing function with a stake in this,
+`money_job_margins`, was rewritten to subtract `quantity × unit_cost` per ticket and in the totals.
+
+The order-save signature takes `uuid[]`/`numeric[]` rather than a jsonb blob: PostgREST maps arrays
+without ambiguity, so a malformed call fails at validation instead of half way through an insert.
+
+## Agent 29 — Frontend engineer (R9 stock room)
+
+**Brief:** a coordinator should be able to answer "how many do we have, and where" without leaving
+the console.
+
+New **Stock** page with three tabs. Stock: search, category, a low-only toggle, on-hand per part with
+the reorder point underneath, status pill, value at cost, and a row that opens the part sheet
+(balances per location, last 25 movements with signed deltas, edit, move). Catalog: cost, sale, margin
+and reorder rules, with the editor. Orders: supplier cards with status, expected date, per-line
+progress bars, send/cancel, and a receive dialog that names the shelf.
+
+On a ticket, a collapsible **Parts used** drawer: count, charge and margin in the collapsed row, the
+booked lines with cost and warranty date, a book-out form that only offers locations that actually
+hold the part, and a remove action that returns it. It hides itself for accounts without
+`assets.view` instead of showing a permission error.
+
+## Agent 30 — QA / release engineer (R9)
+
+| Check | Command | Result |
+| --- | --- | --- |
+| Types | `npx tsc --noEmit` | clean |
+| Tests | `npx vitest run` | 206/206 (18 new) |
+| Build | `npm run build` | compiled |
+| Seed (live) | `parts_seed_demo()` | 2 locations, 5 SKUs, €2 206.40 at cost, 1 order |
+| Oversell (live) | issue 999 from the van | `insufficient_stock`, nothing written |
+| Ticket parts (live) | add PSU then remove | stock 5 → 4 → 5, ledger `issue:1` then `return:1` |
+| Purchase order (live) | receive 30 of 100 | order `partial`, warehouse 180 → 210, movement recorded |
+| Order save (live) | array signature, 2 lines | created, total correct, then deleted |
+| Margin (live) | `money_job_margins` | `parts_cost` 67.60 in the totals |
+| Permissions (live) | client `parts_metrics()` | `not_authorized`; staff flags `can_order: false` |
+| ACLs | `pg_proc.proacl` | API functions = authenticated + service_role only |
+
+**Not covered:** carrier tracking, goods-received photos, RMA workflow, barcode scanning, engineer-app
+parts screen, stock transfers as a paired movement.
