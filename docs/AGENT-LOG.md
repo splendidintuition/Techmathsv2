@@ -457,3 +457,59 @@ Seven pure helpers landed in `portal-dispatch.ts` so the timing logic is testabl
 
 **Not covered:** outbound email/push/SMS, quiet hours, shortlist broadcast, escalation on lapse,
 smart ranking, certificate-gated offers.
+
+## Agent 25 — Frontend engineer (R6 client portal)
+
+**Brief:** a client should never have to email to approve a quote or check an invoice.
+
+The client account landed on the operations overview and could do nothing with it. R6 adds a
+**Workspace** page and makes it the client's landing page: an account banner (organisation, VAT,
+standing), four stat cards (open requests, quotes to approve, outstanding, paid this year), the
+agreement card, an attention list that links to the tab that resolves it, and tabs for quotes,
+invoices, requests and sites.
+
+Vocabulary matters as much as layout: `completed_pending_approval` reads *Waiting for your approval*,
+`offered` reads *Matching an engineer*, and internal states never reach the client. Accepting a quote
+is two taps with the total restated; declining asks what to change and passes the reason to the team.
+Opening a completed request offers **Approve the work** or **Send back** with a note.
+
+Eighteen assertions in `tests/portal-v6.test.ts` cover the copy, tones, billing arithmetic, validity
+countdowns, settlement percentage, error copy and the invoice CSV.
+
+## Agent 26 — Data engineer (R7 contracts)
+
+**Brief:** make the SLA a database fact, not a note in a spreadsheet.
+
+`client_contracts` carries four shapes in one table. The load-bearing pieces are a `before insert`
+trigger that stamps `contract_id` and `sla_due_at` from the client's active tier, and `contract_usage`
+which recomputes hours from approved time entries (monthly for a retainer, over the whole life for a
+bundle) so nobody can type usage in by hand.
+
+Two rules are enforced in the database, not the UI: one active SLA tier per client (partial unique
+index plus a friendly error), and a bundle draw-down that cannot exceed the purchased hours.
+
+The client reads the same contract through `portal_client_contracts`, which strips the fee and the
+margin — the client sees the promise, not the price list.
+
+## Agent 27 — QA / release engineer (R6–R8)
+
+| Check | Command | Result |
+| --- | --- | --- |
+| Types | `npx tsc --noEmit` | clean |
+| Tests | `npx vitest run` | 188/188 (40 new across R6–R8) |
+| Build | `npm run build` | compiled, `/portal` 151 kB / 291 kB |
+| Client home (live) | `portal_client_home()` as the demo client | 2 open requests, 1 quote awaiting, 853.13 EUR outstanding, next visit in 2 days |
+| Quote decision (live) | temporary sent quote, declined by the client | status `declined`, audit row, admin + staff notified |
+| Visit request (live) | `portal_client_request_visit` | ticket in `visit_request`, 2 notifications |
+| Sign-off (live) | `portal_client_sign_off(false)` | ticket back to `in_progress`, client note on the timeline |
+| Contract read (live) | `contract_get` as the demo client | `not_authorized` — fees are internal; the client sees `portal_client_contracts` only |
+| SLA trigger (live) | ticket created with no due date | `contract_id` = Gold SLA, 240-minute window |
+| Contracts (live) | `contract_metrics()` | 2 active, 1 400 EUR MRR, 20 included hours |
+| Reports (live) | `reports_ops`, `reports_finance` | 31 daily points, 1 156 net invoiced, 853.13 outstanding, 92.7 % margin |
+| Permissions | helper ACLs | client helpers and `portal_notify` revoked from `anon` + `authenticated` |
+
+QA rows (temporary quote, visit-request ticket, notifications, the temporary ticket,
+its events) were deleted afterwards; the demo dataset was left intact and the money flags stayed on.
+
+**Not covered:** email/SMS delivery, online card payment, PDF rendering, XLSX export, scheduled
+reports, signature capture, cleared-engineer rules, contract renewal workflow.

@@ -45,7 +45,7 @@ Every status below was checked in code or in the database; nothing is inferred f
 | Engineer availability, holidays, time zones | 🟡 | `engineer_availability`, `time_off`, availability toggle (`offline/available/busy`). No holiday editor or per-country time-zone view. |
 | Drag-and-drop resource planner | ⛔ | Schedule is a read-mostly list by day; nothing is draggable. |
 | Capacity warnings ("2 certified engineers free in Germany") | 🟡 | `portal_capacity` counts free engineers per day. No certification filtering, no warning copy. |
-| Client visit booking with admin confirmation | ⛔ | No booking surface for clients. |
+| Client visit booking with admin confirmation | 🟡 | **R6**: a client books from the Sites tab; the request becomes a `new` ticket with a preferred date and every admin/staff account is notified. Confirmation is the coordinator scheduling or assigning it — there is no separate approve button. |
 | Calendar sync (Google, Outlook, Apple) | ⛔ | No integration. |
 
 ## §3.4 Clients, sites and contracts
@@ -55,10 +55,10 @@ Every status below was checked in code or in the database; nothing is inferred f
 | Client profiles: contacts, billing, VAT, history | 🟡 | **R4**: create/edit name, billing email, VAT, country, with open-ticket count. Contacts, SLA and price list on the profile: not built. |
 | Site pages: address, map, hours, parking, security, photos, rack plans | 🟡 | **R4**: address, country, coordinates, geofence, asset count, access procedure. Opening hours, parking, entrance photos and rack plans: not built. |
 | Access instructions to assigned engineer only | 🟡 | Access text is a separate permission (`clients.access_codes`), never in list payloads, and `can_access_site_instructions` is scoped. Time-limited codes and auto-hide after completion: not built. |
-| Quotes from a price list, client accepts online, converts to tickets | 🟡 | Quote builder, send, `money_respond_quote` and `money_quote_to_invoice` are live. No client-facing screen; attribution to tickets is per line, not automatic conversion. |
-| Contracts: retainers, prepaid bundles, SLA tiers | ⛔ | No contracts table. `clients.contracts` currently gates rate cards. |
+| Quotes from a price list, client accepts online, converts to tickets | 🟡 | **R6**: the client workspace lists sent quotes with the full breakdown and accepts or declines in one click (`portal_client_respond_quote`, audit + notification). Conversion is still a coordinator action (`money_quote_to_invoice`), and quote lines are attributed per line rather than auto-creating tickets. |
+| Contracts: retainers, prepaid bundles, SLA tiers | ✅ | **R7**: `client_contracts` covers SLA tiers, retainers, prepaid bundles and frameworks; sla targets are copied onto every ticket by a trigger, retainer hours reset monthly from approved field time, bundles draw down, and the console shows compliance and overage. |
 | Client health score | ⛔ | Not computed. |
-| Client-specific rules (cleared engineers, signature, hour approval) | ⛔ | Not implemented. |
+| Client-specific rules (cleared engineers, signature, hour approval) | 🟡 | **R6**: the client signs work off (`portal_client_sign_off`) or sends it back with a note, and both decisions notify the team. Cleared-engineer lists, signature capture and pre-approved hour caps: not built. |
 
 ## §3.5 People
 
@@ -151,15 +151,15 @@ Every status below was checked in code or in the database; nothing is inferred f
 
 | Plan item | Status | Where it stands |
 | --- | --- | --- |
-| Dashboard (open requests, visits, SLA, hours, invoices) | ⛔ | Clients see tickets only; no money, SLA or hours card. |
+| Dashboard (open requests, visits, SLA, hours, invoices) | ✅ | **R6**: client workspace opens with open requests, next visit, quotes to approve, outstanding balance, paid this year, the agreement card (SLA targets, retainer/bundle left) and an attention list. |
 | Guided request form with templates and photos | 🟡 | Clients can raise a ticket with category and priority. No templates, no photo upload. |
 | Live status tracker with ETA and arrival notice | ⛔ | Not implemented. |
-| Approve quotes, hours and completed work with signature | ⛔ | The quote RPC authorises a client member, but no client screen calls it. |
+| Approve quotes, hours and completed work with signature | 🟡 | **R6**: quotes accept/decline and completed work is approved or sent back from the ticket sheet. No signature capture and no hourly approval workflow. |
 | Service reports and photo galleries | ⛔ | Not implemented. |
 | Asset and rack view for their equipment | 🟡 | Assets are readable by client members under RLS. No dedicated view. |
-| Booking calendar for visits | ⛔ | Not implemented. |
-| Contracts and SLA page | ⛔ | No contracts. |
-| Invoices, payment history, pay online, VAT-ready PDFs | ⛔ | No client money screen, no payment gateway, no document output. |
+| Booking calendar for visits | 🟡 | **R6**: request form with a preferred date per site. No calendar grid or slot picking. |
+| Contracts and SLA page | ✅ | **R7**: the client workspace shows each active agreement with response/resolution targets, coverage, hours left and on-time percentage — never the fee. |
+| Invoices, payment history, pay online, VAT-ready PDFs | 🟡 | **R6**: issued invoices with line detail, balance, settlement bar, payments received and a CSV download. No card payment (excluded by the owner) and no PDF rendering. |
 | Team management (who approves, who sees invoices) | ⛔ | Admin manages memberships; no client-side team screen. |
 | Satisfaction survey and quarterly review | ⛔ | Not implemented. |
 | Help center and support chat | ⛔ | Not implemented. |
@@ -223,13 +223,13 @@ Every status below was checked in code or in the database; nothing is inferred f
 
 | Plan item | Status | Where it stands |
 | --- | --- | --- |
-| Operations: status, aging, first response, SLA, reopened | ⛔ | Raw counters only on the overview. No report screens. |
-| People: utilisation, acceptance, on-time, hours by country | ⛔ | Directory shows 30-day hours per engineer. Nothing else. |
-| Money: revenue, cost, margin by ticket/client/engineer/country | 🟡 | Margin per job and unallocated money are live (R3.2). Aggregations by engineer or country: not built. |
+| Operations: status, aging, first response, SLA, reopened | 🟡 | **R8**: volume per day, status/priority/category/country mix, first-response averages, SLA met/breached, client and engineer load. Reopened tickets are not tracked. |
+| People: utilisation, acceptance, on-time, hours by country | 🟡 | **R8**: per-engineer assigned, closed and logged hours for the window. No acceptance rate or hours-by-country split. |
+| Money: revenue, cost, margin by ticket/client/engineer/country | 🟡 | **R8**: net invoiced, VAT, collected, outstanding, aging buckets, margin by client, VAT by country, monthly billing and top debtors. Engineer-level margin still comes from the R3.2 job view. |
 | Quality: satisfaction, rework, photo compliance | ⛔ | Not implemented. |
 | Demand: busiest sites, days, fastest-growing categories | ⛔ | Not implemented. |
 | Scheduled emailed reports | ⛔ | Not implemented. |
-| Exports to CSV/XLSX/PDF and accountant pack | 🟡 | **R4** audit CSV. Finance and operation exports: not built. |
+| Exports to CSV/XLSX/PDF and accountant pack | 🟡 | **R8**: CSV for operations, SLA, finance and audit, each generated from the same numbers on screen. No XLSX, PDF or accountant pack. |
 
 ## §10 Security and trust
 
@@ -288,17 +288,35 @@ scored separately above):
 
 | Status | Items | Share |
 | --- | --- | --- |
-| ✅ live | 11 | 8 % |
-| 🟡 partial | 38 | 28 % |
-| ⛔ missing | 86 | 64 % |
+| ✅ live | 14 | 10 % |
+| 🟡 partial | 45 | 33 % |
+| ⛔ missing | 76 | 56 % |
 | **Total** | **135** | |
 
-Including the roadmap mapping (§11, 5 rows), the seven locked decisions (§13) and the nine permission
-rules (§14) — 156 tracked rows — the split is 18 ✅ / 46 🟡 / 92 ⛔.
+Across every tracked row in the document — the plan tables above, the roadmap mapping (§11), the seven
+locked decisions (§13) and the nine permission rules (§14) — 145 rows split 21 ✅ / 47 🟡 / 77 ⛔.
 
 Read it this way: the core loop, the money spine and the data-centre inventory are real and enforced in
 the database. What separates this from the plan is breadth — dispatch offers, contracts, parts, safety
 paperwork, reporting, automation and the client-facing half of the portal.
+
+## What R6–R8 changed on this branch
+
+- **§6 client portal (R6)** — `portal_client_home`, `portal_client_quotes`, `portal_client_quote`,
+  `portal_client_respond_quote`, `portal_client_invoices`, `portal_client_invoice`,
+  `portal_client_tickets`, `portal_client_ticket`, `portal_client_sites`,
+  `portal_client_request_visit`, `portal_client_sign_off`; new **Workspace** page for client accounts
+  with quotes, invoices, requests, sites and an agreement card.
+- **§3.3 booking (R6)** — a client visit request becomes a real `new` ticket with a preferred date and
+  notifies every admin and staff account.
+- **§3.4 contracts (R7)** — `client_contracts` with four kinds, `contract_list/get/save/set_status/
+  consume_bundle/metrics`, `contract_usage`, a trigger that copies the SLA target onto each ticket,
+  a **Contracts** console page and a client-safe agreement read.
+- **§7 / §9 reporting (R8)** — `reports_ops`, `reports_finance`, `reports_sla`, a **Reports** page with
+  operations / SLA / finance tabs and CSV export of each from the same numbers on screen.
+- **Security hardening** — every organisation-scoped helper introduced by these releases is revoked
+  from `anon` and `authenticated` explicitly, because this project's default privileges grant EXECUTE
+  on new functions to both roles.
 
 ## What R5 changed on this branch
 
