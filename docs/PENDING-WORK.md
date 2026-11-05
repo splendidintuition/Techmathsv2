@@ -179,6 +179,10 @@ Carried over from your standing instructions — a release is not finished until
 
 ---
 
+> **Superseded as a plan of record.** The 100× programme in `docs/UPGRADE-PROGRAMME.md` sequences every
+> remaining row into twelve releases across four waves (R10–R21), with a scorecard and acceptance gates;
+> `docs/BATTLE-MODE.md` holds the paste-ready prompts. This file stays as the inventory of what is open.
+
 ## 7. Suggested next step
 
 Start **R10 (field app depth)** now that stock exists — the job pack, the step workflow and the
