@@ -42,6 +42,14 @@ one active `sla_tier` per organisation, because two live tiers would make `sla_d
 - **`portal_client_contracts()`** — the client-safe shape: kind, targets, coverage, hours left and
   on-time percentage. No fee, no margin, no internal note.
 
+`client_contracts` itself is **internal-only under RLS**: its select policy calls `contract_can_view`,
+which now answers true only for an internal user holding `clients.contracts` or `clients.view`. A
+client therefore cannot read the table, call `contract_get` (`not_authorized`) or see a fee anywhere;
+the agreement reaches them through the definer function above. That predicate is the one helper
+granted to `authenticated`, because Postgres evaluates a policy as the caller — everything else
+(`contract_can_manage`, `contract_active_for`, `contract_usage`, the trigger) is revoked from every
+API role.
+
 All writes are security-definer RPCs behind `clients.contracts` (`contract_save`,
 `contract_set_status`, `contract_consume_bundle`). Reads are allowed with `clients.view`. Every
 change is written to `audit_logs` with before/after.

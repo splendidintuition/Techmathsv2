@@ -502,6 +502,7 @@ margin — the client sees the promise, not the price list.
 | Quote decision (live) | temporary sent quote, declined by the client | status `declined`, audit row, admin + staff notified |
 | Visit request (live) | `portal_client_request_visit` | ticket in `visit_request`, 2 notifications |
 | Sign-off (live) | `portal_client_sign_off(false)` | ticket back to `in_progress`, client note on the timeline |
+| Contract read (live) | `contract_get` as the demo client | `not_authorized` — fees are internal; the client sees `portal_client_contracts` only |
 | SLA trigger (live) | ticket created with no due date | `contract_id` = Gold SLA, 240-minute window |
 | Contracts (live) | `contract_metrics()` | 2 active, 1 400 EUR MRR, 20 included hours |
 | Reports (live) | `reports_ops`, `reports_finance` | 31 daily points, 1 156 net invoiced, 853.13 outstanding, 92.7 % margin |

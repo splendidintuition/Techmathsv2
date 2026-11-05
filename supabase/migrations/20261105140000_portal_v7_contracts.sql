@@ -76,11 +76,16 @@ returns boolean language sql stable security definer set search_path = '' as $$
 $$;
 revoke all on function public.contract_can_manage() from public, anon, authenticated;
 
+-- Internal read path only. A client reads the agreement through `portal_client_contracts`, which
+-- strips the fee, the overage rate and the internal note; the table itself is never theirs to read.
 create or replace function public.contract_can_view(p_org uuid)
 returns boolean language sql stable security definer set search_path = '' as $$
-  select public.contract_can_manage()
-      or coalesce(public.is_internal_user() and public.has_portal_permission('clients.view'), false)
-      or coalesce(public.is_org_member(p_org), false)
+  select coalesce(
+    public.is_internal_user() and (
+      public.has_portal_permission('clients.contracts') or public.has_portal_permission('clients.view')
+    ),
+    false
+  )
 $$;
 revoke all on function public.contract_can_view(uuid) from public, anon, authenticated;
 
@@ -699,15 +704,20 @@ begin
     execute format('grant execute on function %s to authenticated', fn.sig);
   end loop;
 
+  -- Helper predicates and triggers are not an API: nothing outside the definer functions calls them.
   for fn in
     select p.oid::regprocedure as sig
     from pg_proc p
     join pg_namespace n on n.oid = p.pronamespace
     where n.nspname = 'public' and p.proname in (
-      'contract_can_manage','contract_can_view','contract_active_for','contract_usage',
-      'portal_apply_contract_sla'
+      'contract_can_manage','contract_active_for','contract_usage','portal_apply_contract_sla'
     )
   loop
     execute format('revoke all on function %s from public, anon, authenticated', fn.sig);
   end loop;
+
+  -- Exception: the SELECT policy on client_contracts is evaluated as the caller, so the caller must
+  -- be allowed to execute the predicate it calls. It returns a boolean and reads no rows.
+  execute 'revoke all on function public.contract_can_view(uuid) from public, anon';
+  execute 'grant execute on function public.contract_can_view(uuid) to authenticated';
 end $$;
