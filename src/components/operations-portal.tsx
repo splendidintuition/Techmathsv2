@@ -650,11 +650,14 @@ export function OperationsPortal() {
       <div className="pointer-events-none fixed inset-0 -z-0 bg-grid opacity-25" />
       <div className="relative flex min-h-screen">
         {/* Sidebar */}
-        <aside className="sticky top-0 hidden h-screen w-[246px] shrink-0 flex-col border-r border-white/[0.07] bg-[#080D14]/95 lg:flex">
-          <div className="flex h-[72px] items-center border-b border-white/[0.06] px-5">
+        {/* The rail is pinned to the viewport, so it has to own its scrolling: the nav scrolls, the
+            brand, the workspace card and the account row stay put. Without `min-h-0` on the scroll
+            container the flex child refuses to shrink and the sign-out row falls below the fold. */}
+        <aside className="sticky top-0 hidden h-[100dvh] w-[246px] shrink-0 flex-col overflow-hidden border-r border-white/[0.07] bg-[#080D14]/95 lg:flex">
+          <div className="flex h-[72px] shrink-0 items-center border-b border-white/[0.06] px-5">
             <BrandMark />
           </div>
-          <div className="px-4 pt-5">
+          <div className="shrink-0 px-4 pt-5">
             <div className="flex items-center gap-2.5 rounded-xl border border-white/[0.07] bg-white/[0.025] px-3 py-2.5">
               <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-[#38E1FF]/10 text-[#38E1FF]">
                 <ShieldCheck size={14} />
@@ -668,7 +671,7 @@ export function OperationsPortal() {
             </div>
           </div>
 
-          <nav className="mt-7 flex-1 px-3">
+          <nav className="mt-6 min-h-0 flex-1 overflow-y-auto overscroll-contain px-3 pb-3">
             <div className="mono-label mb-2 px-3 text-[9px] text-[#58657A]">WORKSPACE</div>
             {navItems.map(([label, Icon]) => (
               <button
@@ -691,7 +694,7 @@ export function OperationsPortal() {
             ))}
           </nav>
 
-          <div className="border-t border-white/[0.06] p-3">
+          <div className="shrink-0 border-t border-white/[0.06] p-3">
             <div className="flex items-center gap-2.5 rounded-xl bg-white/[0.025] p-2.5">
               <div className="flex h-[31px] w-[31px] items-center justify-center rounded-full border border-[#38E1FF]/25 bg-[#38E1FF]/10 text-[10px] text-[#38E1FF]">
                 {(profile.full_name || session.user.email || "TM")
@@ -707,8 +710,13 @@ export function OperationsPortal() {
                 </div>
                 <div className="mt-0.5 capitalize text-[9px] text-[#748197]">{profile.role}</div>
               </div>
-              <button onClick={signOut} title="Sign out" className="text-[#68758A] hover:text-white">
-                <LogOut size={14} />
+              <button
+                onClick={signOut}
+                title="Sign out"
+                aria-label="Sign out"
+                className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-[#68758A] transition hover:bg-white/[0.06] hover:text-white"
+              >
+                <LogOut size={15} />
               </button>
             </div>
           </div>
