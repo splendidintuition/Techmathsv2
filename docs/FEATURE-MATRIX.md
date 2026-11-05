@@ -9,6 +9,9 @@ Legend: **✅ live** (screen + database enforcement) · **🟡 partial** (some o
 
 Every status below was checked in code or in the database; nothing is inferred from the plan text.
 
+> For the *plan* of what to build next — decisions needed, technical debt, proposed releases and quick
+> wins — see `docs/PENDING-WORK.md`. This file says what exists; that file says what to do about it.
+
 ---
 
 ## §3.1 Home and command center
